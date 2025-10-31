@@ -1,5 +1,4 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -23,47 +22,48 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
+    // Validate inputs
     if (!email.trim() || !password.trim()) {
       Alert.alert('Validation Error', 'Please enter both email and password');
       return;
     }
-
     setLoading(true);
-
     setTimeout(() => {
       setLoading(false);
       Alert.alert('Success', 'Login successful!');
     }, 2000);
   };
 
-  const handleBiometricLogin = async () => {
-    try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      if (!hasHardware) {
-        Alert.alert('Not Supported', 'Biometric authentication is not supported on this device');
-        return;
-      }
+  // const handleBiometricLogin = async () => {
+  //   try {
+  //     // Check if device supports biometric authentication
+  //     const hasHardware = await LocalAuthentication.hasHardwareAsync();
+  //     if (!hasHardware) {
+  //       Alert.alert('Not Supported', 'Biometric authentication is not supported on this device');
+  //       return;
+  //     }
 
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      if (!isEnrolled) {
-        Alert.alert('Not Enrolled', 'No biometric data found. Please set up biometrics in your device settings.');
-        return;
-      }
+  //     const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+  //     if (!isEnrolled) {
+  //       Alert.alert('Not Enrolled', 'No biometric data found. Please set up biometrics in your device settings.');
+  //       return;
+  //     }
 
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Login with Biometrics',
-        fallbackLabel: 'Use passcode',
-      });
+  //     // Attempt biometric authentication
+  //     const result = await LocalAuthentication.authenticateAsync({
+  //       promptMessage: 'Login with Biometrics',
+  //       fallbackLabel: 'Use passcode',
+  //     });
 
-      if (result.success) {
-        Alert.alert('Success', 'Login successful!');
-      } else {
-        Alert.alert('Authentication Failed', 'Please try again');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'An error occurred during biometric authentication');
-    }
-  };
+  //     if (result.success) {
+  //       Alert.alert('Success', 'Login successful!');
+  //     } else {
+  //       Alert.alert('Authentication Failed', 'Please try again');
+  //     }
+  //   } catch (error) {
+  //     Alert.alert('Error', 'An error occurred during biometric authentication');
+  //   }
+  // };
 
   return (
     <KeyboardAvoidingView
@@ -74,13 +74,16 @@ export default function Index() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Shield Icon */}
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons name="shield-check" size={80} color="#007BFF" />
         </View>
 
+        {/* Title */}
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Log in to your account</Text>
 
+        {/* Email Input */}
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
@@ -94,6 +97,7 @@ export default function Index() {
           />
         </View>
 
+        {/* Password Input */}
         <View style={styles.inputContainer}>
           <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
@@ -118,10 +122,12 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
+        {/* Forgot Password */}
         <TouchableOpacity onPress={() => {}} disabled={loading}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
+        {/* Login Button */}
         <TouchableOpacity
           style={[styles.loginButton, loading && styles.loginButtonDisabled]}
           onPress={handleLogin}
@@ -134,21 +140,23 @@ export default function Index() {
           )}
         </TouchableOpacity>
 
+        {/* Biometric Login Button
         <TouchableOpacity
           style={styles.biometricButton}
           onPress={handleBiometricLogin}
-          disabled={loading}
-        >
-          <MaterialCommunityIcons name="fingerprint" size={24} color="#007BFF" />
+          disabled={loading} */}
+        {/* > */}
+          {/* <MaterialCommunityIcons name="fingerprint" size={24} color="#007BFF" />
           <Text style={styles.biometricButtonText}>Login with Biometrics</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
+        {/* Sign Up Link */}
         <View style={styles.signUpContainer}>
-  <Text style={styles.signUpText}>Don't have an account? </Text>
-  <TouchableOpacity onPress={() => router.push('/SignUp')} disabled={loading}>
-    <Text style={styles.signUpLink}>Sign Up</Text>
-  </TouchableOpacity>
-</View>
+          <Text style={styles.signUpText}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => router.push('/SignUp')} disabled={loading}>
+            <Text style={styles.signUpLink}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -225,23 +233,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  biometricButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#007BFF',
-    backgroundColor: '#fff',
-    marginBottom: 24,
-  },
-  biometricButtonText: {
-    color: '#007BFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
+  // biometricButton: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   height: 50,
+  //   borderRadius: 8,
+  //   borderWidth: 1,
+  //   borderColor: '#007BFF',
+  //   backgroundColor: '#fff',
+  //   marginBottom: 24,
+  // },
+  // biometricButtonText: {
+  //   color: '#007BFF',
+  //   fontSize: 16,
+  //   fontWeight: '600',
+  //   marginLeft: 8,
+  // },
   signUpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

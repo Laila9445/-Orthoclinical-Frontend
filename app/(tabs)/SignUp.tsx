@@ -1,17 +1,17 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function SignUp() {
@@ -50,7 +50,7 @@ export default function SignUp() {
       Alert.alert('Success', 'Account created successfully!', [
         {
           text: 'OK',
-          onPress: () => router.push('/(tabs)'),
+          onPress: () => router.push('/modal'),
         },
       ]);
     }, 2000);
@@ -167,9 +167,11 @@ export default function SignUp() {
         {/* Sign In Link */}
         <View style={styles.signInContainer}>
           <Text style={styles.signInText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.back()} disabled={loading}>
-            <Text style={styles.signInLink}>Sign In</Text>
-          </TouchableOpacity>
+          <Link href="/(tabs)" asChild>
+            <TouchableOpacity disabled={loading}>
+              <Text style={styles.signInLink}>Sign In</Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
