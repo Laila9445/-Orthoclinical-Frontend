@@ -1,19 +1,19 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
 
 export default function TabLayout() {
   return (
-    <Tabs 
-      initialRouteName="Home"
-      screenOptions={{ 
+    <Tabs
+      screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007BFF',
+        tabBarActiveTintColor: "#007BFF",
       }}
     >
       <Tabs.Screen
         name="Home"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="home" size={24} color={color} />
           ),
@@ -22,7 +22,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Login',
+          title: "Login",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="login" size={24} color={color} />
           ),

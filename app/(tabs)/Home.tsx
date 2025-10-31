@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
+import 'expo-router/entry';
 import React from 'react';
 import {
   SafeAreaView,
