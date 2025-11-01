@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -15,7 +15,6 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-
 
 
 export default function Index() {
@@ -33,7 +32,7 @@ export default function Index() {
       return;
     }
     setLoading(true);
-    
+
     // Attempt login
     const result = await login(email, password);
     setLoading(false);
@@ -140,7 +139,7 @@ export default function Index() {
         </View>
 
         {/* Forgot Password */}
-        <TouchableOpacity onPress={() => {}} disabled={loading}>
+        <TouchableOpacity onPress={() => { }} disabled={loading}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
@@ -163,7 +162,7 @@ export default function Index() {
           onPress={handleBiometricLogin}
           disabled={loading} */}
         {/* > */}
-          {/* <MaterialCommunityIcons name="fingerprint" size={24} color="#007BFF" />
+        {/* <MaterialCommunityIcons name="fingerprint" size={24} color="#007BFF" />
           <Text style={styles.biometricButtonText}>Login with Biometrics</Text>
         </TouchableOpacity> */}
 
