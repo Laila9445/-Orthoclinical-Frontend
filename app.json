@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "clinical_project",
-    "slug": "clinical_project",
+    "name": "my-clinic-app",
+    "slug": "my-clinic-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "clinicalproject",
+    "scheme": "myclinicapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
