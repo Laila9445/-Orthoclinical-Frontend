@@ -13,14 +13,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Validate inputs
     if (!email.trim() || !password.trim()) {
       Alert.alert('Validation Error', 'Please enter both email and password');
@@ -30,11 +34,17 @@ const LoginScreen = () => {
     // Show loading spinner
     setLoading(true);
 
-    // Simulate API call with 2 second delay
-    setTimeout(() => {
-      setLoading(false);
+    // Attempt login
+    const result = await login(email, password);
+    setLoading(false);
+
+    if (result.success) {
       Alert.alert('Success', 'Login successful!');
-    }, 2000);
+      // Navigate to dashboard
+      router.replace('/DashboardScreen');
+    } else {
+      Alert.alert('Login Failed', result.error || 'Please check your credentials');
+    }
   };
 
   const handleBiometricLogin = async () => {
@@ -59,7 +69,12 @@ const LoginScreen = () => {
       });
 
       if (result.success) {
-        Alert.alert('Success', 'Login successful!');
+        // On successful biometric auth, login with any email
+        const loginResult = await login(email || 'nurse@clinic.com', 'nurse123');
+        if (loginResult.success) {
+          Alert.alert('Success', 'Login successful!');
+          router.replace('/DashboardScreen');
+        }
       } else {
         Alert.alert('Authentication Failed', 'Please try again');
       }

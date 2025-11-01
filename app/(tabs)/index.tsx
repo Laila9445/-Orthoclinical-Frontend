@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
 
 
 
@@ -23,18 +24,27 @@ export default function Index() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Validate inputs
     if (!email.trim() || !password.trim()) {
       Alert.alert('Validation Error', 'Please enter both email and password');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    
+    // Attempt login
+    const result = await login(email, password);
+    setLoading(false);
+
+    if (result.success) {
       Alert.alert('Success', 'Login successful!');
-    }, 2000);
+      // Navigate to dashboard
+      router.replace('/DashboardScreen');
+    } else {
+      Alert.alert('Login Failed', result.error || 'Please check your credentials');
+    }
   };
 
   // const handleBiometricLogin = async () => {
