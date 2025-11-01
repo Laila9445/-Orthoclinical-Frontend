@@ -40,8 +40,12 @@ export default function Index() {
 
     if (result.success) {
       Alert.alert('Success', 'Login successful!');
-      // Navigate to dashboard
-      router.replace('/DashboardScreen');
+      // Navigate to appropriate dashboard based on role
+      if (result.role === 'doctor') {
+        router.replace('/DoctorDashboardScreen');
+      } else {
+        router.replace('/DashboardScreen');
+      }
     } else {
       Alert.alert('Login Failed', result.error || 'Please check your credentials');
     }
