@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -57,6 +58,14 @@ export default function SignUp() {
   };
 
   return (
+    <ImageBackground
+          source={{ uri: 'https://img.freepik.com/premium-photo/digital-visualization-human-knee-joint-highlighting-anatomical-structure-medical-analysis_74231-10759.jpg?semt=ais_hybrid&w=740&q=80' }}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        >
+          {/* Semi-transparent overlay */}
+          <View style={styles.overlay} />
+
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -67,7 +76,7 @@ export default function SignUp() {
       >
         {/* User Icon */}
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="account-plus" size={80} color="#007BFF" />
+          <MaterialCommunityIcons name="account-plus" size={80} color="#ffffffff" />
         </View>
 
         {/* Title */}
@@ -163,6 +172,28 @@ export default function SignUp() {
             <Text style={styles.signUpButtonText}>Sign Up</Text>
           )}
         </TouchableOpacity>
+        
+        <TouchableOpacity 
+         style={styles.homeButton}
+         onPress={() => router.push('/Home')}
+>
+             <MaterialCommunityIcons name="home" size={28} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+  
+>
+  <MaterialCommunityIcons name="home" size={28} color="#fff" />
+</TouchableOpacity>
+
+{/* About Us Button - Top Right */}
+<TouchableOpacity 
+  style={styles.aboutButton}
+  onPress={() => router.push('/about')}
+>
+  <MaterialCommunityIcons name="information" size={28} color="#fff" />
+</TouchableOpacity>
+
+
 
         {/* Sign In Link */}
         <View style={styles.signInContainer}>
@@ -174,14 +205,26 @@ export default function SignUp() {
           </Link>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+      </ImageBackground>
+      
+    
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    
   },
   scrollContent: {
     flexGrow: 1,
@@ -195,25 +238,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 32,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    borderColor: '#fff',
     borderRadius: 8,
     paddingHorizontal: 12,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Transparent white
   },
   inputIcon: {
     marginRight: 8,
@@ -228,13 +277,14 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   signUpButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Transparent white
     height: 50,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   signUpButtonDisabled: {
     opacity: 0.7,
@@ -251,11 +301,39 @@ const styles = StyleSheet.create({
   },
   signInText: {
     fontSize: 14,
-    color: '#666',
+    color: '#ffffffff',
   },
   signInLink: {
     fontSize: 14,
-    color: '#007BFF',
+    color: '#ffffffff',
     fontWeight: '600',
+  },
+  homeButton: {
+    position: 'absolute',
+    top: 50, // Adjust based on your StatusBar height
+    left: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  aboutButton: {
+  position: 'absolute',
+  top: 50,
+  right: 20,
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  borderWidth: 1,
+  borderColor: '#fff',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 10,
   },
 });

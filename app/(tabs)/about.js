@@ -1,3 +1,5 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import {
     ScrollView,
     StatusBar,
@@ -8,8 +10,10 @@ import {
 } from 'react-native';
 
 export default function AboutUs() {
+    const router = useRouter();
+    
     const teamMembers = [
-        { id: 1, name: 'Laila Mohamed', emoji: '🩺' },
+        { id: 1, name: 'Laila Sarg', emoji: '🩺' },
         { id: 2, name: 'Malak Ayman', emoji: '🩺' },
         { id: 3, name: 'Nada Hassan', emoji: '🩺' },
         { id: 4, name: 'Nada Mohamed', emoji: '🩺' },
@@ -22,8 +26,11 @@ export default function AboutUs() {
 
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
-                    <Text style={styles.backIcon}>←</Text>
+                <TouchableOpacity 
+                    style={styles.homeButton}
+                    onPress={() => router.push('/Home')}
+                >
+                    <MaterialCommunityIcons name="home" size={24} color="#121417" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>About Us</Text>
                 <View style={styles.placeholder} />
@@ -118,15 +125,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
     },
-    backButton: {
+    homeButton: {
         width: 48,
         height: 48,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    backIcon: {
-        fontSize: 24,
-        color: '#121417',
+        borderRadius: 12,
+        backgroundColor: '#f6f7f8',
     },
     headerTitle: {
         fontSize: 20,

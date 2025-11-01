@@ -14,8 +14,20 @@ export default function RootLayout() {
     <AuthProvider>
       <PatientProvider>
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false }} />
-          <StatusBar style="auto" />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "fade",
+              gestureEnabled: true,
+            }}
+          >
+            {/* Screens */}
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="signup" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
         </ThemeProvider>
       </PatientProvider>
     </AuthProvider>
