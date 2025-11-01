@@ -3,19 +3,19 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
-const NurseProfileScreen = () => {
+const DoctorProfileScreen = () => {
   const { user, updateProfile } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -30,9 +30,9 @@ const NurseProfileScreen = () => {
 
   useEffect(() => {
     // Initialize form with user data
-    setEditedName(user?.name || 'Sarah Johnson');
-    setEditedEmail(user?.email || user?.email || 'sarah.johnson@clinic.com');
-    setEditedPhone(user?.phone || '+1 (555) 123-4567');
+    setEditedName(user?.name || 'Dr. Michael Green');
+    setEditedEmail(user?.email || user?.email || 'michael.green@clinic.com');
+    setEditedPhone(user?.phone || '+1 (555) 987-6543');
     setProfileImage(user?.profileImage || null);
   }, [user]);
 
@@ -60,7 +60,7 @@ const NurseProfileScreen = () => {
       return;
     }
 
-    if (currentPassword !== 'nurse123') {
+    if (currentPassword !== 'doctor123') {
       Alert.alert('Error', 'Current password is incorrect');
       return;
     }
@@ -167,7 +167,7 @@ const NurseProfileScreen = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Nurse Profile</Text>
+        <Text style={styles.headerTitle}>Doctor Profile</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -190,9 +190,9 @@ const NurseProfileScreen = () => {
             </TouchableOpacity>
           </View>
           <Text style={styles.profileName}>
-            {editedName || 'Sarah Johnson'}
+            {editedName || 'Dr. Michael Green'}
           </Text>
-          <Text style={styles.profileRole}>Registered Nurse</Text>
+          <Text style={styles.profileRole}>Orthopedic Surgeon</Text>
         </View>
 
         {/* Profile Information */}
@@ -209,9 +209,9 @@ const NurseProfileScreen = () => {
                   onPress={() => {
                     setIsEditing(false);
                     // Reset to original values
-                    setEditedName(user?.name || 'Sarah Johnson');
-                    setEditedEmail(user?.email || user?.email || 'sarah.johnson@clinic.com');
-                    setEditedPhone(user?.phone || '+1 (555) 123-4567');
+                    setEditedName(user?.name || 'Dr. Michael Green');
+                    setEditedEmail(user?.email || user?.email || 'michael.green@clinic.com');
+                    setEditedPhone(user?.phone || '+1 (555) 987-6543');
                   }}
                   style={styles.cancelButton}
                 >
@@ -288,12 +288,16 @@ const NurseProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Additional Info */}
+        {/* Professional Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Additional Information</Text>
+          <Text style={styles.sectionTitle}>Professional Information</Text>
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Employee ID</Text>
-            <Text style={styles.fieldValue}>NUR-2024-001</Text>
+            <Text style={styles.fieldLabel}>License Number</Text>
+            <Text style={styles.fieldValue}>MD-2024-001</Text>
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Specialization</Text>
+            <Text style={styles.fieldValue}>Orthopedic Surgery</Text>
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Department</Text>
@@ -301,7 +305,11 @@ const NurseProfileScreen = () => {
           </View>
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>Years of Experience</Text>
-            <Text style={styles.fieldValue}>5 years</Text>
+            <Text style={styles.fieldValue}>15 years</Text>
+          </View>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Board Certification</Text>
+            <Text style={styles.fieldValue}>American Board of Orthopedic Surgery</Text>
           </View>
         </View>
       </ScrollView>
@@ -556,5 +564,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NurseProfileScreen;
+export default DoctorProfileScreen;
 
