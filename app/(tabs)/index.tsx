@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -63,14 +64,19 @@ export default function Index() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.formContainer}>
-            {/* Shield Icon */}
-            <View style={styles.iconContainer}>
-              <MaterialCommunityIcons name="shield-check" size={80} color="#fff" />
-            </View>
+                        contentContainerStyle={styles.scrollContent}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                      >
+                        <View style={styles.formContainer}>
+                          {/* Logo */}
+                          <View style={styles.logoContainer}>
+                            <Image 
+                              source={require('../../assets/images/Logo.jpg')} 
+                              style={styles.logo}
+                              resizeMode="contain"
+                            />
+                          </View>
             {/* Home Button - Top Left */}
       <TouchableOpacity 
         style={styles.homeButton}
@@ -312,4 +318,14 @@ aboutButton: {
   alignItems: 'center',
   zIndex: 10,
 },
+logoContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
 });

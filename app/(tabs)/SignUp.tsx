@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -71,14 +72,21 @@ export default function SignUp() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.formContainer}> 
-        {/* User Icon */}
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="account-plus" size={80} color="#ffffffff" />
-        </View>
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.formContainer}>
+                  {/* Logo */}
+                  <View style={styles.logoContainer}>
+                    <Image 
+                      source={require('../../assets/images/Logo.jpg')} 
+                      style={styles.logo}
+                      resizeMode="contain"
+                    />
+                  </View>
+      
+        
 
         {/* Title */}
         <Text style={styles.title}>Create Account</Text>
@@ -206,7 +214,9 @@ export default function SignUp() {
           </Link>
         </View>
         </View> 
+        
       </ScrollView>
+      
       </KeyboardAvoidingView>
       </ImageBackground>
       
@@ -345,5 +355,15 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   alignItems: 'center',
   zIndex: 10,
+  },
+  logoContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
 });
