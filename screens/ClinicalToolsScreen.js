@@ -3,16 +3,19 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Dimensions,
+  FlatList,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { usePatient } from '../context/PatientContext';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const ClinicalToolsScreen = () => {
   const router = useRouter();
@@ -21,10 +24,8 @@ const ClinicalToolsScreen = () => {
     activePatient, 
     setActivePatient,
     savePrescription, 
-    saveTestOrder, 
-    saveDiagnosis, 
-    saveClinicalNote,
-    startConsultation 
+    startConsultation,
+    prescriptions: contextPrescriptions,
   } = usePatient();
   
   // Try to set patient from params if provided and no active patient
@@ -40,468 +41,502 @@ const ClinicalToolsScreen = () => {
       startConsultation(patient);
     }
   }, [params?.patientId, params?.patientName, activePatient, setActivePatient, startConsultation]);
-  const [activeTab, setActiveTab] = useState('prescription');
+
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
-  const [showTestOrderModal, setShowTestOrderModal] = useState(false);
-  const [showDiagnosisModal, setShowDiagnosisModal] = useState(false);
-  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showPatientSelectionModal, setShowPatientSelectionModal] = useState(false);
+  const [editingPrescription, setEditingPrescription] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showStatusFilter, setShowStatusFilter] = useState(false);
   
-  // Sample patients for selection (in production, this would come from API)
+  // Prescription form state
+  const [patientName, setPatientName] = useState('');
+  const [diagnosis, setDiagnosis] = useState('');
+  const [medications, setMedications] = useState('');
+  const [dosageInstructions, setDosageInstructions] = useState('');
+
+
+  // Sample patients for selection
   const [availablePatients] = useState([
-    { id: 1, name: 'John Doe', age: 45, mrn: 'MRN-001' },
-    { id: 2, name: 'Sarah Williams', age: 38, mrn: 'MRN-002' },
-    { id: 3, name: 'Michael Chen', age: 52, mrn: 'MRN-003' },
-    { id: 4, name: 'Emma Thompson', age: 34, mrn: 'MRN-004' },
+    { id: 1, name: 'John Smith', age: 45, mrn: 'MRN-001' },
+    { id: 2, name: 'Emma Johnson', age: 38, mrn: 'MRN-002' },
+    { id: 3, name: 'Michael Brown', age: 52, mrn: 'MRN-003' },
+    { id: 4, name: 'Sarah Davis', age: 34, mrn: 'MRN-004' },
+    { id: 5, name: 'Robert Wilson', age: 41, mrn: 'MRN-005' },
+    { id: 6, name: 'Emily Chen', age: 29, mrn: 'MRN-006' },
+    { id: 7, name: 'David Martinez', age: 56, mrn: 'MRN-007' },
+    { id: 8, name: 'Lisa Anderson', age: 42, mrn: 'MRN-008' },
   ]);
 
-  // Prescription state
-  const [medSearch, setMedSearch] = useState('');
-  const [selectedMed, setSelectedMed] = useState('');
-  const [dosage, setDosage] = useState('');
-  const [frequency, setFrequency] = useState('');
-  const [duration, setDuration] = useState('');
+  // Sample prescription data
+  const [prescriptions, setPrescriptions] = useState([
+    {
+      id: '1',
+      rxCode: 'RX-2024-001',
+      status: 'Active',
+      patient: 'John Smith',
+      date: '1/15/2024',
+      diagnosis: 'Upper respiratory infection',
+      medications: 'Amoxicillin 500mg, Ibuprofen 400mg',
+      dosage: '500mg',
+      frequency: 'BID',
+      duration: '7 days',
+    },
+    {
+      id: '2',
+      rxCode: 'RX-2024-002',
+      status: 'Dispensed',
+      patient: 'Emma Johnson',
+      date: '1/14/2024',
+      diagnosis: 'Type 2 Diabetes management',
+      medications: 'Metformin 500mg',
+      dosage: '500mg',
+      frequency: 'BID',
+      duration: '30 days',
+    },
+    {
+      id: '3',
+      rxCode: 'RX-2024-003',
+      status: 'Active',
+      patient: 'Michael Brown',
+      date: '1/13/2024',
+      diagnosis: 'Hypertension',
+      medications: 'Lisinopril 10mg, Amlodipine 5mg',
+      dosage: '10mg, 5mg',
+      frequency: 'QD',
+      duration: '30 days',
+    },
+    {
+      id: '4',
+      rxCode: 'RX-2024-004',
+      status: 'Pending',
+      patient: 'Sarah Davis',
+      date: '1/12/2024',
+      diagnosis: 'Gastroesophageal reflux disease',
+      medications: 'Omeprazole 20mg',
+      dosage: '20mg',
+      frequency: 'QD',
+      duration: '14 days',
+    },
+    {
+      id: '5',
+      rxCode: 'RX-2024-005',
+      status: 'Active',
+      patient: 'Robert Wilson',
+      date: '1/11/2024',
+      diagnosis: 'Allergic rhinitis',
+      medications: 'Cetirizine 10mg, Fluticasone nasal spray',
+      dosage: '10mg, 1 spray',
+      frequency: 'QD',
+      duration: '30 days',
+    },
+    {
+      id: '6',
+      rxCode: 'RX-2024-006',
+      status: 'Active',
+      patient: 'Emily Chen',
+      date: '1/10/2024',
+      diagnosis: 'Migraine',
+      medications: 'Sumatriptan 50mg',
+      dosage: '50mg',
+      frequency: 'As needed',
+      duration: '30 days',
+    },
+    {
+      id: '7',
+      rxCode: 'RX-2024-007',
+      status: 'Dispensed',
+      patient: 'David Martinez',
+      date: '1/9/2024',
+      diagnosis: 'Asthma',
+      medications: 'Albuterol inhaler',
+      dosage: '2 puffs',
+      frequency: 'As needed',
+      duration: '90 days',
+    },
+    {
+      id: '8',
+      rxCode: 'RX-2024-008',
+      status: 'Pending',
+      patient: 'Lisa Anderson',
+      date: '1/8/2024',
+      diagnosis: 'Osteoarthritis',
+      medications: 'Naproxen 500mg',
+      dosage: '500mg',
+      frequency: 'BID',
+      duration: '30 days',
+    },
+  ]);
 
-  // Test order state
-  const [testType, setTestType] = useState('');
-  const [testPriority, setTestPriority] = useState('routine');
-  const [testNotes, setTestNotes] = useState('');
-  const [testDiagnosis, setTestDiagnosis] = useState('');
-
-  // Diagnosis state
-  const [diagnosisSearch, setDiagnosisSearch] = useState('');
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState('');
-
-  // Clinical notes state
-  const [noteTemplate, setNoteTemplate] = useState('soap');
-  const [clinicalNotes, setClinicalNotes] = useState('');
-
-  // Sample medications
-  const medications = [
-    'Metformin 500mg',
-    'Lisinopril 10mg',
-    'Ibuprofen 400mg',
-    'Amoxicillin 500mg',
-    'Aspirin 81mg',
-    'Atorvastatin 20mg',
-  ];
-
-  // Sample ICD-10 codes
-  const icd10Codes = [
-    { code: 'E11.9', description: 'Type 2 diabetes mellitus without complications' },
-    { code: 'M25.561', description: 'Pain in right knee' },
-    { code: 'M25.562', description: 'Pain in left knee' },
-    { code: 'M79.3', description: 'Panniculitis, unspecified' },
-    { code: 'I10', description: 'Essential (primary) hypertension' },
-    { code: 'M54.5', description: 'Low back pain' },
-  ];
-
-  const filteredMedications = medications.filter((med) =>
-    med.toLowerCase().includes(medSearch.toLowerCase())
-  );
-
-  const filteredDiagnoses = icd10Codes.filter((diagnosis) =>
-    diagnosis.code.toLowerCase().includes(diagnosisSearch.toLowerCase()) ||
-    diagnosis.description.toLowerCase().includes(diagnosisSearch.toLowerCase())
-  );
-
-  const checkActivePatient = () => {
-    if (!activePatient) {
-      Alert.alert(
-        'No Active Patient',
-        'Please select a patient before using clinical tools.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Select Patient', onPress: () => setShowPatientSelectionModal(true) },
-        ]
-      );
-      return false;
+  // Load prescriptions from context on mount
+  useEffect(() => {
+    if (contextPrescriptions) {
+      const allPrescriptions = [];
+      Object.keys(contextPrescriptions).forEach((patientId) => {
+        contextPrescriptions[patientId].forEach((prescription) => {
+          const patient = availablePatients.find(p => p.id.toString() === patientId);
+          allPrescriptions.push({
+            id: prescription.id || Date.now().toString(),
+            rxCode: `RX-${new Date().getFullYear()}-${String(prescriptions.length + allPrescriptions.length + 1).padStart(3, '0')}`,
+            status: prescription.status || 'Active',
+            patient: patient?.name || prescription.patientName || 'Unknown',
+            date: new Date(prescription.timestamp || prescription.date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: 'numeric'
+            }),
+            diagnosis: prescription.diagnosis || 'Not specified',
+            medications: `${prescription.medication || ''} ${prescription.dosage || ''}`.trim(),
+            dosage: prescription.dosage || '',
+            frequency: prescription.frequency || '',
+            duration: prescription.duration || '',
+          });
+        });
+      });
+      if (allPrescriptions.length > 0) {
+        setPrescriptions(prev => [...allPrescriptions, ...prev]);
+      }
     }
-    return true;
-  };
+  }, []);
+
+  const filteredPrescriptions = prescriptions.filter((prescription) => {
+    const matchesSearch = 
+      prescription.rxCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prescription.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prescription.diagnosis.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prescription.medications.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || prescription.status.toLowerCase() === statusFilter.toLowerCase();
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const handleSelectPatient = (patient) => {
     setActivePatient(patient);
+    setPatientName(patient.name);
     startConsultation(patient);
     setShowPatientSelectionModal(false);
-    Alert.alert('Patient Selected', `Active patient set to: ${patient.name}`);
+  };
+
+  const resetForm = () => {
+    setPatientName('');
+    setDiagnosis('');
+    setMedications('');
+    setDosageInstructions('');
+    setEditingPrescription(null);
+  };
+
+  const openEditModal = (prescription) => {
+    setEditingPrescription(prescription);
+    setPatientName(prescription.patient);
+    setDiagnosis(prescription.diagnosis);
+    setMedications(prescription.medications || '');
+    setDosageInstructions(prescription.dosageInstructions || `${prescription.frequency || ''}${prescription.duration ? `, ${prescription.duration}` : ''}`.trim());
+    setShowEditModal(true);
   };
 
   const handlePrescriptionSubmit = () => {
-    if (!checkActivePatient()) return;
-    
-    if (!selectedMed || !dosage || !frequency || !duration) {
+    if (!patientName || !medications.trim()) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
-    
-    // Create prescription object with all data
-    const prescription = {
-      medication: selectedMed,
-      dosage,
-      frequency,
-      duration,
-      patientName: activePatient.name,
-      date: new Date().toISOString(),
-    };
-    
-    const result = savePrescription(prescription);
-    
-    if (result.success) {
-      Alert.alert(
-        'Success', 
-        `Prescription saved successfully!\n\nPatient: ${activePatient.name}\nMedication: ${selectedMed}\nDosage: ${dosage}\nFrequency: ${frequency}\nDuration: ${duration}`
-      );
+
+    if (editingPrescription) {
+      // Update existing prescription
+      const updatedPrescription = {
+        ...editingPrescription,
+        patient: patientName,
+        diagnosis: diagnosis || 'Not specified',
+        medications: medications.trim(),
+        dosageInstructions: dosageInstructions.trim(),
+      };
+
+      setPrescriptions(prev => prev.map(p => 
+        p.id === editingPrescription.id ? updatedPrescription : p
+      ));
+      
+      Alert.alert('Success', 'Prescription updated successfully!');
+      setShowEditModal(false);
+      resetForm();
+      return;
+    } else {
+      // Create new prescription
+      const newPrescription = {
+        id: Date.now().toString(),
+        rxCode: `RX-${new Date().getFullYear()}-${String(prescriptions.length + 1).padStart(3, '0')}`,
+        status: 'Active',
+        patient: patientName,
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'numeric',
+          day: 'numeric',
+          year: 'numeric'
+        }),
+        diagnosis: diagnosis || 'Not specified',
+        medications: medications.trim(),
+        dosageInstructions: dosageInstructions.trim(),
+      };
+
+      setPrescriptions(prev => [newPrescription, ...prev]);
+
+      // Save to context if active patient exists
+      if (activePatient) {
+        const prescriptionData = {
+          medication: medications.trim(),
+          dosageInstructions: dosageInstructions.trim(),
+          patientName: activePatient.name,
+          diagnosis: diagnosis || 'Not specified',
+          status: 'Active',
+          date: new Date().toISOString(),
+        };
+        savePrescription(prescriptionData);
+      }
+
+      Alert.alert('Success', 'Prescription created successfully!');
       setShowPrescriptionModal(false);
-      // Reset form
-      setSelectedMed('');
-      setMedSearch('');
-      setDosage('');
-      setFrequency('');
-      setDuration('');
-    } else {
-      Alert.alert('Error', result.error || 'Failed to save prescription');
+    }
+    
+    resetForm();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return { backgroundColor: '#4CAF50', color: '#fff' };
+      case 'dispensed':
+        return { backgroundColor: '#FFFFFF', color: '#333333' };
+      case 'pending':
+        return { backgroundColor: '#FFC107', color: '#333333' };
+      default:
+        return { backgroundColor: '#9E9E9E', color: '#fff' };
     }
   };
 
-  const handleTestOrderSubmit = () => {
-    if (!checkActivePatient()) return;
-    
-    if (!testType || !testPriority) {
-      Alert.alert('Error', 'Please fill all required fields');
-      return;
-    }
-    
-    // Create test order object with all data including diagnosis and notes
-    const testOrder = {
-      testType,
-      testPriority,
-      testNotes: testNotes.trim(),
-      testDiagnosis: testDiagnosis.trim(),
-      patientName: activePatient.name,
-      patientId: activePatient.id,
-      patientAge: activePatient.age,
-      patientMRN: activePatient.mrn,
-      date: new Date().toISOString(),
-    };
-    
-    const result = saveTestOrder(testOrder);
-    
-    if (result.success) {
-      Alert.alert(
-        'Success', 
-        `Test order submitted successfully!\n\nPatient: ${activePatient.name}\nTest: ${testType}\nPriority: ${testPriority}${testDiagnosis ? `\nDiagnosis: ${testDiagnosis}` : ''}${testNotes ? `\nNotes: ${testNotes}` : ''}`
-      );
-      setShowTestOrderModal(false);
-      // Reset form
-      setTestType('');
-      setTestPriority('routine');
-      setTestNotes('');
-      setTestDiagnosis('');
-    } else {
-      Alert.alert('Error', result.error || 'Failed to save test order');
-    }
+  const handleViewPrescription = (prescription) => {
+    Alert.alert(
+      'Prescription Details', 
+      `RX Code: ${prescription.rxCode}\n\n` +
+      `Status: ${prescription.status}\n` +
+      `Patient: ${prescription.patient}\n` +
+      `Date: ${prescription.date}\n` +
+      `Diagnosis: ${prescription.diagnosis}\n\n` +
+      `Medications: ${prescription.medications}\n` +
+      `Dosage: ${prescription.dosage || 'N/A'}\n` +
+      `Frequency: ${prescription.frequency || 'N/A'}\n` +
+      `Duration: ${prescription.duration || 'N/A'}`,
+      [{ text: 'OK' }]
+    );
   };
 
-  const handleDiagnosisSubmit = () => {
-    if (!checkActivePatient()) return;
-    
-    if (!selectedDiagnosis) {
-      Alert.alert('Error', 'Please select a diagnosis code');
-      return;
-    }
-    
-    // Create diagnosis object with all data
-    const diagnosis = {
-      diagnosisCode: selectedDiagnosis,
-      patientName: activePatient.name,
-      patientId: activePatient.id,
-      date: new Date().toISOString(),
-    };
-    
-    const result = saveDiagnosis(diagnosis);
-    
-    if (result.success) {
-      Alert.alert(
-        'Success', 
-        `Diagnosis code added successfully!\n\nPatient: ${activePatient.name}\nDiagnosis: ${selectedDiagnosis}`
-      );
-      setShowDiagnosisModal(false);
-      // Reset form
-      setSelectedDiagnosis('');
-      setDiagnosisSearch('');
-    } else {
-      Alert.alert('Error', result.error || 'Failed to save diagnosis');
-    }
+  const handlePrintPrescription = (prescription) => {
+    Alert.alert('Print Prescription', `Printing prescription ${prescription.rxCode}...`);
+    // In a real app, this would trigger a print dialog or PDF generation
   };
 
-  const handleNotesSubmit = () => {
-    if (!checkActivePatient()) return;
+  const handleEditPrescription = (prescription) => {
+    openEditModal(prescription);
+  };
+
+  const handleDeletePrescription = (prescription) => {
+    Alert.alert(
+      'Delete Prescription',
+      `Are you sure you want to delete ${prescription.rxCode}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setPrescriptions(prev => prev.filter(p => p.id !== prescription.id));
+            Alert.alert('Success', 'Prescription deleted successfully');
+          },
+        },
+      ]
+    );
+  };
+
+  const renderPrescriptionRow = ({ item, index }) => {
+    const statusStyle = getStatusColor(item.status);
     
-    if (!clinicalNotes.trim()) {
-      Alert.alert('Error', 'Please enter clinical notes');
-      return;
-    }
-    
-    // Create notes object with all data - auto-assigned to active patient
-    const notes = {
-      noteTemplate,
-      clinicalNotes: clinicalNotes.trim(),
-      patientName: activePatient.name,
-      patientId: activePatient.id,
-      date: new Date().toISOString(),
-    };
-    
-    const result = saveClinicalNote(notes);
-    
-    if (result.success) {
-      Alert.alert(
-        'Success', 
-        `Clinical notes saved successfully!\n\nPatient: ${activePatient.name}\nTemplate: ${noteTemplate.toUpperCase()}\nNotes: ${clinicalNotes.substring(0, 50)}${clinicalNotes.length > 50 ? '...' : ''}`
-      );
-      setShowNotesModal(false);
-      setClinicalNotes('');
-    } else {
-      Alert.alert('Error', result.error || 'Failed to save clinical notes');
-    }
+    return (
+      <View style={[styles.tableRow, index % 2 === 1 && styles.tableRowOdd]}>
+        <View style={[styles.tableCell, styles.rxCodeCell]}>
+          <Text style={styles.tableCellText} numberOfLines={1}>{item.rxCode}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.statusCell]}>
+          <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
+            <Text style={[styles.statusText, { color: statusStyle.color }]} numberOfLines={1}>
+              {item.status}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.tableCell, styles.patientCell]}>
+          <Text style={styles.tableCellText} numberOfLines={1}>{item.patient}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.dateCell]}>
+          <Text style={styles.tableCellText} numberOfLines={1}>{item.date}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.diagnosisCell]}>
+          <Text style={styles.tableCellText} numberOfLines={2}>{item.diagnosis}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.medicationsCell]}>
+          <Text style={styles.tableCellText} numberOfLines={2}>{item.medications}</Text>
+        </View>
+        <View style={[styles.tableCell, styles.actionsCell]}>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity onPress={() => handleViewPrescription(item)} style={styles.actionButton}>
+              <Ionicons name="eye" size={18} color="#2196F3" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handlePrintPrescription(item)} style={styles.actionButton}>
+              <MaterialCommunityIcons name="printer" size={18} color="#4CAF50" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleEditPrescription(item)} style={styles.actionButton}>
+              <Ionicons name="pencil" size={18} color="#FF9800" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleDeletePrescription(item)} style={styles.actionButton}>
+              <Ionicons name="trash" size={18} color="#F44336" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
   };
 
   return (
-      <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Clinical Tools</Text>
-          {activePatient ? (
-            <Text style={styles.patientNameHeader}>Current Patient: {activePatient.name}</Text>
-          ) : (
-            <TouchableOpacity onPress={() => setShowPatientSelectionModal(true)}>
-              <Text style={styles.selectPatientLink}>Select Patient</Text>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Main Card Container */}
+        <View style={styles.mainCard}>
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <View style={styles.titleLeft}>
+              <Text style={styles.mainTitle}>Digital Prescriptions</Text>
+              <Text style={styles.subtitle}>Create and manage digital prescriptions for your patients.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.newPrescriptionButton}
+              onPress={() => {
+                resetForm();
+                if (!activePatient) {
+                  setShowPatientSelectionModal(true);
+                } else {
+                  setPatientName(activePatient.name);
+                  setShowPrescriptionModal(true);
+                }
+              }}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+              <Text style={styles.newPrescriptionButtonText}>New Prescription</Text>
             </TouchableOpacity>
-          )}
+          </View>
+
+          {/* Search and Filter Section */}
+          <View style={styles.searchFilterSection}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color="#9E9E9E" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search prescriptions..."
+                placeholderTextColor="#9E9E9E"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            <View style={styles.filterButtonContainer}>
+              <TouchableOpacity 
+                style={styles.filterButton}
+                onPress={() => setShowStatusFilter(!showStatusFilter)}
+              >
+                <Text style={styles.filterButtonText} numberOfLines={1}>
+                  {statusFilter === 'all' ? 'All Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color="#fff" />
+              </TouchableOpacity>
+              {showStatusFilter && (
+                <View style={styles.filterDropdown}>
+                  <TouchableOpacity 
+                    style={styles.filterOption}
+                    onPress={() => {
+                      setStatusFilter('all');
+                      setShowStatusFilter(false);
+                    }}
+                  >
+                    <Text style={styles.filterOptionText}>All Status</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.filterOption}
+                    onPress={() => {
+                      setStatusFilter('active');
+                      setShowStatusFilter(false);
+                    }}
+                  >
+                    <Text style={styles.filterOptionText}>Active</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.filterOption}
+                    onPress={() => {
+                      setStatusFilter('dispensed');
+                      setShowStatusFilter(false);
+                    }}
+                  >
+                    <Text style={styles.filterOptionText}>Dispensed</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.filterOption}
+                    onPress={() => {
+                      setStatusFilter('pending');
+                      setShowStatusFilter(false);
+                    }}
+                  >
+                    <Text style={styles.filterOptionText}>Pending</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Table Container with Horizontal Scroll */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.tableScrollContainer}>
+            <View style={styles.tableContainer}>
+              {/* Table Header */}
+              <View style={styles.tableHeader}>
+                <View style={[styles.tableHeaderCell, styles.rxCodeCell]}>
+                  <Text style={styles.tableHeaderText}>RX CODE</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.statusCell]}>
+                  <Text style={styles.tableHeaderText}>STATUS</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.patientCell]}>
+                  <Text style={styles.tableHeaderText}>PATIENT</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.dateCell]}>
+                  <Text style={styles.tableHeaderText}>DATE</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.diagnosisCell]}>
+                  <Text style={styles.tableHeaderText}>DIAGNOSIS</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.medicationsCell]}>
+                  <Text style={styles.tableHeaderText}>MEDICATIONS</Text>
+                </View>
+                <View style={[styles.tableHeaderCell, styles.actionsCell]}>
+                  <Text style={styles.tableHeaderText}>ACTIONS</Text>
+                </View>
+              </View>
+
+              {/* Table Body */}
+              <FlatList
+                data={filteredPrescriptions}
+                renderItem={({ item, index }) => renderPrescriptionRow({ item, index })}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+              />
+            </View>
+          </ScrollView>
         </View>
-        <View style={styles.placeholder} />
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'prescription' && styles.activeTab]}
-          onPress={() => setActiveTab('prescription')}
-        >
-          <MaterialCommunityIcons
-            name="prescription"
-            size={20}
-            color={activeTab === 'prescription' ? '#007BFF' : '#666'}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'prescription' && styles.activeTabText,
-            ]}
-          >
-            Prescription
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'test' && styles.activeTab]}
-          onPress={() => setActiveTab('test')}
-        >
-          <MaterialCommunityIcons
-            name="clipboard-list"
-            size={20}
-            color={activeTab === 'test' ? '#007BFF' : '#666'}
-          />
-          <Text
-            style={[styles.tabText, activeTab === 'test' && styles.activeTabText]}
-          >
-            Test Orders
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'diagnosis' && styles.activeTab]}
-          onPress={() => setActiveTab('diagnosis')}
-        >
-          <MaterialCommunityIcons
-            name="medical-bag"
-            size={20}
-            color={activeTab === 'diagnosis' ? '#007BFF' : '#666'}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'diagnosis' && styles.activeTabText,
-            ]}
-          >
-            Diagnosis
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'notes' && styles.activeTab]}
-          onPress={() => setActiveTab('notes')}
-        >
-          <MaterialCommunityIcons
-            name="file-document"
-            size={20}
-            color={activeTab === 'notes' ? '#007BFF' : '#666'}
-          />
-          <Text
-            style={[styles.tabText, activeTab === 'notes' && styles.activeTabText]}
-          >
-            Notes
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.content}>
-        {/* Prescription Tab */}
-        {activeTab === 'prescription' && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Prescription Writer</Text>
-              <Text style={styles.sectionDescription}>
-                Search for medications and create prescriptions with dosage instructions
-              </Text>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={() => {
-                  if (!activePatient) {
-                    setShowPatientSelectionModal(true);
-                  } else {
-                    setShowPrescriptionModal(true);
-                  }
-                }}
-              >
-                <MaterialCommunityIcons name="plus-circle" size={24} color="#fff" />
-                <Text style={styles.primaryButtonText}>New Prescription</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.infoCard}>
-              <Ionicons name="information-circle" size={24} color="#007BFF" />
-              <Text style={styles.infoText}>
-                Quick tip: Use the search function to quickly find medications and check for drug interactions
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Test Orders Tab */}
-        {activeTab === 'test' && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Test Orders</Text>
-              <Text style={styles.sectionDescription}>
-                Order laboratory tests, imaging studies, and other diagnostic procedures
-              </Text>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={() => {
-                  if (!activePatient) {
-                    setShowPatientSelectionModal(true);
-                  } else {
-                    setShowTestOrderModal(true);
-                  }
-                }}
-              >
-                <MaterialCommunityIcons name="plus-circle" size={24} color="#fff" />
-                <Text style={styles.primaryButtonText}>New Test Order</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.priorityInfo}>
-              <Text style={styles.priorityTitle}>Priority Levels:</Text>
-              <View style={styles.priorityItem}>
-                <View style={[styles.priorityIndicator, { backgroundColor: '#DC3545' }]} />
-                <Text style={styles.priorityText}>Urgent - Results needed immediately</Text>
-              </View>
-              <View style={styles.priorityItem}>
-                <View style={[styles.priorityIndicator, { backgroundColor: '#FF9800' }]} />
-                <Text style={styles.priorityText}>High - Results needed within 24 hours</Text>
-              </View>
-              <View style={styles.priorityItem}>
-                <View style={[styles.priorityIndicator, { backgroundColor: '#007BFF' }]} />
-                <Text style={styles.priorityText}>Routine - Standard processing time</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Diagnosis Tab */}
-        {activeTab === 'diagnosis' && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>ICD-10 Diagnosis Codes</Text>
-              <Text style={styles.sectionDescription}>
-                Search and add diagnosis codes using ICD-10 classification
-              </Text>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={() => {
-                  if (!activePatient) {
-                    setShowPatientSelectionModal(true);
-                  } else {
-                    setShowDiagnosisModal(true);
-                  }
-                }}
-              >
-                <MaterialCommunityIcons name="plus-circle" size={24} color="#fff" />
-                <Text style={styles.primaryButtonText}>Add Diagnosis Code</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.infoCard}>
-              <Ionicons name="information-circle" size={24} color="#007BFF" />
-              <Text style={styles.infoText}>
-                ICD-10 codes are required for billing and medical documentation. Search by code or description.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Clinical Notes Tab */}
-        {activeTab === 'notes' && (
-          <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Clinical Notes</Text>
-              <Text style={styles.sectionDescription}>
-                Template-based note taking for patient encounters
-              </Text>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={() => {
-                  if (!activePatient) {
-                    setShowPatientSelectionModal(true);
-                  } else {
-                    setShowNotesModal(true);
-                  }
-                }}
-              >
-                <MaterialCommunityIcons name="plus-circle" size={24} color="#fff" />
-                <Text style={styles.primaryButtonText}>New Clinical Note</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.templateInfo}>
-              <Text style={styles.templateTitle}>Note Templates:</Text>
-              <View style={styles.templateItem}>
-                <Text style={styles.templateName}>SOAP</Text>
-                <Text style={styles.templateDescription}>Subjective, Objective, Assessment, Plan</Text>
-              </View>
-              <View style={styles.templateItem}>
-                <Text style={styles.templateName}>HPI</Text>
-                <Text style={styles.templateDescription}>History of Present Illness</Text>
-              </View>
-              <View style={styles.templateItem}>
-                <Text style={styles.templateName}>Physical Exam</Text>
-                <Text style={styles.templateDescription}>Systematic physical examination</Text>
-              </View>
-            </View>
-          </View>
-        )}
       </ScrollView>
 
       {/* Prescription Modal */}
@@ -509,431 +544,239 @@ const ClinicalToolsScreen = () => {
         visible={showPrescriptionModal}
         transparent
         animationType="slide"
-        onRequestClose={() => setShowPrescriptionModal(false)}
+        onRequestClose={() => {
+          setShowPrescriptionModal(false);
+          resetForm();
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>New Prescription</Text>
-              <TouchableOpacity onPress={() => setShowPrescriptionModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+              <TouchableOpacity onPress={() => {
+                setShowPrescriptionModal(false);
+                resetForm();
+              }}>
+                <Ionicons name="close" size={28} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            {activePatient && (
-              <View style={styles.currentPatientHeader}>
-                <MaterialCommunityIcons name="account-circle" size={20} color="#007BFF" />
-                <Text style={styles.currentPatientText}>
-                  Current Patient: <Text style={styles.currentPatientName}>{activePatient.name}</Text>
-                </Text>
-              </View>
-            )}
 
-            <ScrollView style={styles.modalScroll}>
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={true}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Search Medication</Text>
+                <Text style={styles.inputLabel}>Patient Name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter medication name..."
-                  value={medSearch}
-                  onChangeText={setMedSearch}
-                />
-                {medSearch.length > 0 && (
-                  <View style={styles.suggestionsList}>
-                    {filteredMedications.map((med, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.suggestionItem}
-                        onPress={() => {
-                          setSelectedMed(med);
-                          setMedSearch(med);
-                        }}
-                      >
-                        <MaterialCommunityIcons name="pill" size={20} color="#007BFF" />
-                        <Text style={styles.suggestionText}>{med}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Selected Medication</Text>
-                <TextInput
-                  style={styles.input}
-                  value={selectedMed}
-                  onChangeText={setSelectedMed}
-                  placeholder="Medication name"
+                  value={patientName}
+                  onChangeText={setPatientName}
+                  placeholder="Enter patient name"
+                  placeholderTextColor="#9E9E9E"
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Dosage</Text>
+                <Text style={styles.inputLabel}>Diagnosis</Text>
                 <TextInput
                   style={styles.input}
-                  value={dosage}
-                  onChangeText={setDosage}
-                  placeholder="e.g., 500mg"
+                  value={diagnosis}
+                  onChangeText={setDiagnosis}
+                  placeholder="Enter diagnosis"
+                  placeholderTextColor="#9E9E9E"
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Frequency</Text>
-                <TextInput
-                  style={styles.input}
-                  value={frequency}
-                  onChangeText={setFrequency}
-                  placeholder="e.g., BID, QD, TID"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Duration</Text>
-                <TextInput
-                  style={styles.input}
-                  value={duration}
-                  onChangeText={setDuration}
-                  placeholder="e.g., 30 days"
-                />
-              </View>
-
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handlePrescriptionSubmit}
-              >
-                <Text style={styles.submitButtonText}>Save Prescription</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Test Order Modal */}
-      <Modal
-        visible={showTestOrderModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowTestOrderModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Test Order</Text>
-              <TouchableOpacity onPress={() => setShowTestOrderModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            {activePatient && (
-              <View style={styles.currentPatientHeader}>
-                <MaterialCommunityIcons name="account-circle" size={20} color="#007BFF" />
-                <Text style={styles.currentPatientText}>
-                  Current Patient: <Text style={styles.currentPatientName}>{activePatient.name}</Text>
-                  {activePatient.age && ` • Age: ${activePatient.age}`}
-                  {activePatient.mrn && ` • MRN: ${activePatient.mrn}`}
-                </Text>
-              </View>
-            )}
-
-            <ScrollView style={styles.modalScroll}>
-              {/* Pre-filled Patient Info Section */}
-              {activePatient && (
-                <View style={styles.prefilledInfoCard}>
-                  <Text style={styles.prefilledInfoTitle}>Patient Information</Text>
-                  <View style={styles.prefilledInfoRow}>
-                    <Text style={styles.prefilledInfoLabel}>Name:</Text>
-                    <Text style={styles.prefilledInfoValue}>{activePatient.name}</Text>
-                  </View>
-                  {activePatient.age && (
-                    <View style={styles.prefilledInfoRow}>
-                      <Text style={styles.prefilledInfoLabel}>Age:</Text>
-                      <Text style={styles.prefilledInfoValue}>{activePatient.age} years</Text>
-                    </View>
-                  )}
-                  {activePatient.mrn && (
-                    <View style={styles.prefilledInfoRow}>
-                      <Text style={styles.prefilledInfoLabel}>MRN:</Text>
-                      <Text style={styles.prefilledInfoValue}>{activePatient.mrn}</Text>
-                    </View>
-                  )}
-                </View>
-              )}
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Test Type</Text>
-                <TextInput
-                  style={styles.input}
-                  value={testType}
-                  onChangeText={setTestType}
-                  placeholder="e.g., Complete Blood Count, X-Ray, MRI"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Priority</Text>
-                <View style={styles.priorityButtons}>
-                  <TouchableOpacity
-                    style={[
-                      styles.priorityButton,
-                      testPriority === 'urgent' && styles.priorityButtonActive,
-                    ]}
-                    onPress={() => setTestPriority('urgent')}
-                  >
-                    <Text
-                      style={[
-                        styles.priorityButtonText,
-                        testPriority === 'urgent' && styles.priorityButtonTextActive,
-                      ]}
-                    >
-                      Urgent
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.priorityButton,
-                      testPriority === 'high' && styles.priorityButtonActive,
-                    ]}
-                    onPress={() => setTestPriority('high')}
-                  >
-                    <Text
-                      style={[
-                        styles.priorityButtonText,
-                        testPriority === 'high' && styles.priorityButtonTextActive,
-                      ]}
-                    >
-                      High
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.priorityButton,
-                      testPriority === 'routine' && styles.priorityButtonActive,
-                    ]}
-                    onPress={() => setTestPriority('routine')}
-                  >
-                    <Text
-                      style={[
-                        styles.priorityButtonText,
-                        testPriority === 'routine' && styles.priorityButtonTextActive,
-                      ]}
-                    >
-                      Routine
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Diagnosis (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={testDiagnosis}
-                  onChangeText={setTestDiagnosis}
-                  placeholder="Enter diagnosis or ICD-10 code..."
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Additional Notes (Optional)</Text>
+                <Text style={styles.inputLabel}>Medications (comma separated)</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
-                  value={testNotes}
-                  onChangeText={setTestNotes}
-                  placeholder="Enter any special instructions..."
+                  value={medications}
+                  onChangeText={setMedications}
+                  placeholder="e.g., Amoxicillin 500mg, Ibuprofen 400mg"
+                  placeholderTextColor="#9E9E9E"
                   multiline
                   numberOfLines={4}
+                  textAlignVertical="top"
                 />
               </View>
 
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleTestOrderSubmit}
-              >
-                <Text style={styles.submitButtonText}>Submit Test Order</Text>
-              </TouchableOpacity>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Dosage Instructions</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={dosageInstructions}
+                  onChangeText={setDosageInstructions}
+                  placeholder="e.g., Take twice daily with food"
+                  placeholderTextColor="#9E9E9E"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowPrescriptionModal(false);
+                    resetForm();
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={handlePrescriptionSubmit}
+                >
+                  <Text style={styles.createButtonText}>Create Prescription</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* Diagnosis Modal */}
+      {/* Edit Prescription Modal */}
       <Modal
-        visible={showDiagnosisModal}
+        visible={showEditModal}
         transparent
         animationType="slide"
-        onRequestClose={() => setShowDiagnosisModal(false)}
+        onRequestClose={() => {
+          setShowEditModal(false);
+          resetForm();
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Diagnosis Code</Text>
-              <TouchableOpacity onPress={() => setShowDiagnosisModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
+              <Text style={styles.modalTitle}>Edit Prescription</Text>
+              <TouchableOpacity onPress={() => {
+                setShowEditModal(false);
+                resetForm();
+              }}>
+                <Ionicons name="close" size={28} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            {activePatient && (
-              <View style={styles.currentPatientHeader}>
-                <MaterialCommunityIcons name="account-circle" size={20} color="#007BFF" />
-                <Text style={styles.currentPatientText}>
-                  Current Patient: <Text style={styles.currentPatientName}>{activePatient.name}</Text>
-                </Text>
-              </View>
-            )}
-
-            <ScrollView style={styles.modalScroll}>
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={true}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Search ICD-10 Code</Text>
+                <Text style={styles.inputLabel}>RX Code</Text>
                 <TextInput
-                  style={styles.input}
-                  placeholder="Search by code or description..."
-                  value={diagnosisSearch}
-                  onChangeText={setDiagnosisSearch}
-                />
-                {diagnosisSearch.length > 0 && (
-                  <View style={styles.suggestionsList}>
-                    {filteredDiagnoses.map((diagnosis, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.suggestionItem}
-                        onPress={() => {
-                          setSelectedDiagnosis(`${diagnosis.code} - ${diagnosis.description}`);
-                          setDiagnosisSearch(`${diagnosis.code} - ${diagnosis.description}`);
-                        }}
-                      >
-                        <MaterialCommunityIcons name="medical-bag" size={20} color="#007BFF" />
-                        <View style={styles.suggestionContent}>
-                          <Text style={styles.suggestionCode}>{diagnosis.code}</Text>
-                          <Text style={styles.suggestionDescription}>{diagnosis.description}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Selected Diagnosis</Text>
-                <TextInput
-                  style={styles.input}
-                  value={selectedDiagnosis}
-                  onChangeText={setSelectedDiagnosis}
-                  placeholder="Diagnosis code and description"
+                  style={[styles.input, styles.disabledInput]}
+                  value={editingPrescription?.rxCode || ''}
+                  editable={false}
+                  placeholderTextColor="#9E9E9E"
                 />
               </View>
 
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleDiagnosisSubmit}
-              >
-                <Text style={styles.submitButtonText}>Add Diagnosis</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Clinical Notes Modal */}
-      <Modal
-        visible={showNotesModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowNotesModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Clinical Notes</Text>
-              <TouchableOpacity onPress={() => setShowNotesModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            {activePatient && (
-              <View style={styles.currentPatientHeader}>
-                <MaterialCommunityIcons name="account-circle" size={20} color="#007BFF" />
-                <Text style={styles.currentPatientText}>
-                  Current Patient: <Text style={styles.currentPatientName}>{activePatient.name}</Text>
-                </Text>
-                <Text style={styles.autoAssignNote}>
-                  Note will be automatically assigned to this patient
-                </Text>
-              </View>
-            )}
-
-            <ScrollView style={styles.modalScroll}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Note Template</Text>
-                <View style={styles.templateButtons}>
+                <Text style={styles.inputLabel}>Patient Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={patientName}
+                  onChangeText={setPatientName}
+                  placeholder="Enter patient name"
+                  placeholderTextColor="#9E9E9E"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Diagnosis</Text>
+                <TextInput
+                  style={styles.input}
+                  value={diagnosis}
+                  onChangeText={setDiagnosis}
+                  placeholder="Enter diagnosis"
+                  placeholderTextColor="#9E9E9E"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Medications (comma separated)</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={medications}
+                  onChangeText={setMedications}
+                  placeholder="e.g., Amoxicillin 500mg, Ibuprofen 400mg"
+                  placeholderTextColor="#9E9E9E"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Dosage Instructions</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={dosageInstructions}
+                  onChangeText={setDosageInstructions}
+                  placeholder="e.g., Take twice daily with food"
+                  placeholderTextColor="#9E9E9E"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Status</Text>
+                <View style={styles.statusButtons}>
                   <TouchableOpacity
-                    style={[
-                      styles.templateButton,
-                      noteTemplate === 'soap' && styles.templateButtonActive,
-                    ]}
-                    onPress={() => setNoteTemplate('soap')}
+                    style={[styles.statusButton, editingPrescription?.status === 'Active' && styles.statusButtonActive]}
+                    onPress={() => {
+                      if (editingPrescription) {
+                        setEditingPrescription({ ...editingPrescription, status: 'Active' });
+                      }
+                    }}
                   >
-                    <Text
-                      style={[
-                        styles.templateButtonText,
-                        noteTemplate === 'soap' && styles.templateButtonTextActive,
-                      ]}
-                    >
-                      SOAP
+                    <Text style={[styles.statusButtonText, editingPrescription?.status === 'Active' && styles.statusButtonTextActive]}>
+                      Active
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[
-                      styles.templateButton,
-                      noteTemplate === 'hpi' && styles.templateButtonActive,
-                    ]}
-                    onPress={() => setNoteTemplate('hpi')}
+                    style={[styles.statusButton, editingPrescription?.status === 'Dispensed' && styles.statusButtonActive]}
+                    onPress={() => {
+                      if (editingPrescription) {
+                        setEditingPrescription({ ...editingPrescription, status: 'Dispensed' });
+                      }
+                    }}
                   >
-                    <Text
-                      style={[
-                        styles.templateButtonText,
-                        noteTemplate === 'hpi' && styles.templateButtonTextActive,
-                      ]}
-                    >
-                      HPI
+                    <Text style={[styles.statusButtonText, editingPrescription?.status === 'Dispensed' && styles.statusButtonTextActive]}>
+                      Dispensed
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[
-                      styles.templateButton,
-                      noteTemplate === 'physical' && styles.templateButtonActive,
-                    ]}
-                    onPress={() => setNoteTemplate('physical')}
+                    style={[styles.statusButton, editingPrescription?.status === 'Pending' && styles.statusButtonActive]}
+                    onPress={() => {
+                      if (editingPrescription) {
+                        setEditingPrescription({ ...editingPrescription, status: 'Pending' });
+                      }
+                    }}
                   >
-                    <Text
-                      style={[
-                        styles.templateButtonText,
-                        noteTemplate === 'physical' && styles.templateButtonTextActive,
-                      ]}
-                    >
-                      Physical Exam
+                    <Text style={[styles.statusButtonText, editingPrescription?.status === 'Pending' && styles.statusButtonTextActive]}>
+                      Pending
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Clinical Notes</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={clinicalNotes}
-                  onChangeText={setClinicalNotes}
-                  placeholder={`Enter ${noteTemplate.toUpperCase()} notes...`}
-                  multiline
-                  numberOfLines={10}
-                />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowEditModal(false);
+                    resetForm();
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={handlePrescriptionSubmit}
+                >
+                  <Text style={styles.createButtonText}>Update Prescription</Text>
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleNotesSubmit}
-              >
-                <Text style={styles.submitButtonText}>Save Clinical Notes</Text>
-              </TouchableOpacity>
             </ScrollView>
           </View>
         </View>
@@ -956,10 +799,6 @@ const ClinicalToolsScreen = () => {
             </View>
 
             <ScrollView style={styles.modalScroll}>
-              <Text style={styles.selectionDescription}>
-                Select a patient to associate with clinical actions
-              </Text>
-              
               {availablePatients.map((patient) => (
                 <TouchableOpacity
                   key={patient.id}
@@ -989,193 +828,266 @@ const ClinicalToolsScreen = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: '#F5F5F5',
   },
-  header: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  placeholder: {
-    width: 28,
-  },
-  headerContent: {
+  scrollView: {
     flex: 1,
-    alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  patientNameHeader: {
-    fontSize: 14,
-    color: '#E3F2FD',
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    gap: 4,
-  },
-  activeTab: {
-    backgroundColor: '#E3F2FD',
-  },
-  tabText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
-  },
-  activeTabText: {
-    color: '#007BFF',
-  },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     padding: 16,
   },
-  tabContent: {
+  mainCard: {
     flex: 1,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#2C2C2C',
+    borderRadius: 16,
     padding: 20,
-    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 4,
+    minHeight: screenWidth * 0.8,
   },
-  sectionTitle: {
-    fontSize: 20,
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    flexWrap: 'wrap',
+  },
+  titleLeft: {
+    flex: 1,
+    marginRight: 16,
+    minWidth: screenWidth * 0.5,
+  },
+  mainTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     marginBottom: 8,
   },
-  sectionDescription: {
+  subtitle: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
+    color: '#B0B0B0',
+    lineHeight: 20,
   },
-  primaryButton: {
+  newPrescriptionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007BFF',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     gap: 8,
   },
-  primaryButtonText: {
+  newPrescriptionButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
-  infoCard: {
+  searchFilterSection: {
     flexDirection: 'row',
-    backgroundColor: '#E3F2FD',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
+    gap: 12,
+    flexWrap: 'wrap',
   },
-  infoText: {
+  searchContainer: {
     flex: 1,
-    marginLeft: 12,
-    fontSize: 14,
-    color: '#333',
-  },
-  priorityInfo: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-  },
-  priorityTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  priorityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: '#3A3A3A',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    minWidth: screenWidth * 0.4,
   },
-  priorityIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
+  searchIcon: {
+    marginRight: 8,
   },
-  priorityText: {
+  searchInput: {
+    flex: 1,
+    height: 44,
+    color: '#fff',
     fontSize: 14,
-    color: '#666',
   },
-  templateInfo: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+  filterButtonContainer: {
+    position: 'relative',
   },
-  templateTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3A3A3A',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+    minWidth: 120,
   },
-  templateItem: {
-    marginBottom: 12,
-    paddingBottom: 12,
+  filterButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  filterDropdown: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    marginTop: 4,
+    backgroundColor: '#3A3A3A',
+    borderRadius: 8,
+    minWidth: 150,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  filterOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#4A4A4A',
   },
-  templateName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  templateDescription: {
+  filterOptionText: {
+    color: '#fff',
     fontSize: 14,
-    color: '#666',
+  },
+  tableScrollContainer: {
+    flex: 1,
+  },
+  tableContainer: {
+    backgroundColor: '#2C2C2C',
+    borderRadius: 8,
+    overflow: 'hidden',
+    minWidth: Math.max(800, screenWidth * 0.95),
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#3A3A3A',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#4A4A4A',
+  },
+  tableHeaderCell: {
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  tableHeaderText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#B0B0B0',
+    textTransform: 'uppercase',
+  },
+  rxCodeHeader: {
+    width: 100,
+  },
+  statusHeader: {
+    width: 80,
+  },
+  patientHeader: {
+    width: 120,
+  },
+  dateHeader: {
+    width: 90,
+  },
+  diagnosisHeader: {
+    width: 150,
+  },
+  medicationsHeader: {
+    width: 150,
+    flex: 1,
+  },
+  actionsHeader: {
+    width: 120,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    backgroundColor: '#3A3A3A',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#4A4A4A',
+    minHeight: 60,
+  },
+  tableRowOdd: {
+    backgroundColor: '#333333',
+  },
+  tableCell: {
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  rxCodeCell: {
+    width: 100,
+  },
+  statusCell: {
+    width: 80,
+  },
+  patientCell: {
+    width: 120,
+  },
+  dateCell: {
+    width: 90,
+  },
+  diagnosisCell: {
+    width: 150,
+  },
+  medicationsCell: {
+    width: 150,
+    flex: 1,
+  },
+  actionsCell: {
+    width: 120,
+  },
+  tableCellText: {
+    fontSize: 13,
+    color: '#fff',
+    lineHeight: 18,
+  },
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  actionButton: {
+    padding: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '90%',
+    backgroundColor: '#2C2C2C',
+    borderRadius: 16,
+    width: screenWidth * 0.9,
+    maxWidth: 600,
+    maxHeight: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1183,135 +1095,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#3A3A3A',
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
   },
   modalScroll: {
     flex: 1,
     padding: 20,
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#F9F9F9',
-  },
   textArea: {
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  suggestionsList: {
-    marginTop: 8,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    maxHeight: 200,
-  },
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  suggestionContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  suggestionText: {
-    marginLeft: 12,
-    fontSize: 14,
-    color: '#333',
-  },
-  suggestionCode: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#007BFF',
-  },
-  suggestionDescription: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  priorityButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  priorityButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    alignItems: 'center',
-    backgroundColor: '#F9F9F9',
-  },
-  priorityButtonActive: {
-    borderColor: '#007BFF',
-    backgroundColor: '#E3F2FD',
-  },
-  priorityButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  priorityButtonTextActive: {
-    color: '#007BFF',
-  },
-  templateButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  templateButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    alignItems: 'center',
-    backgroundColor: '#F9F9F9',
-  },
-  templateButtonActive: {
-    borderColor: '#007BFF',
-    backgroundColor: '#E3F2FD',
-  },
-  templateButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  templateButtonTextActive: {
-    color: '#007BFF',
-  },
-  submitButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    height: 100,
+    paddingTop: 12,
   },
   currentPatientHeader: {
     flexDirection: 'row',
@@ -1332,53 +1129,108 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#007BFF',
   },
-  selectPatientLink: {
-    fontSize: 14,
-    color: '#E3F2FD',
-    marginTop: 4,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
-  },
-  prefilledInfoCard: {
-    backgroundColor: '#F5F7FA',
-    borderRadius: 12,
-    padding: 16,
+  inputGroup: {
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
-  prefilledInfoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  prefilledInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#B0B0B0',
     marginBottom: 8,
   },
-  prefilledInfoLabel: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
+  input: {
+    borderWidth: 2,
+    borderColor: '#3A3A3A',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#3A3A3A',
+    color: '#fff',
   },
-  prefilledInfoValue: {
+  disabledInput: {
+    backgroundColor: '#333333',
+    color: '#9E9E9E',
+    borderColor: '#4A4A4A',
+  },
+  suggestionsList: {
+    marginTop: 8,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    maxHeight: 200,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  suggestionText: {
+    marginLeft: 12,
     fontSize: 14,
     color: '#333',
-    fontWeight: '500',
   },
-  autoAssignNote: {
-    fontSize: 12,
-    color: '#007BFF',
-    marginTop: 4,
-    fontStyle: 'italic',
+  statusButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
   },
-  selectionDescription: {
+  statusButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#4A4A4A',
+    alignItems: 'center',
+    backgroundColor: '#3A3A3A',
+    minWidth: 100,
+  },
+  statusButtonActive: {
+    borderColor: '#4CAF50',
+    backgroundColor: '#4CAF50',
+  },
+  statusButtonText: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#B0B0B0',
+  },
+  statusButtonTextActive: {
+    color: '#fff',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#3A3A3A',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#3A3A3A',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  createButton: {
+    flex: 1,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   patientSelectionItem: {
     flexDirection: 'row',
@@ -1424,4 +1276,3 @@ const styles = StyleSheet.create({
 });
 
 export default ClinicalToolsScreen;
-
