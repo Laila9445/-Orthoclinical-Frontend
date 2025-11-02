@@ -74,6 +74,7 @@ export default function SignUp() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        <View style={styles.formContainer}> 
         {/* User Icon */}
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons name="account-plus" size={80} color="#ffffffff" />
@@ -182,7 +183,7 @@ export default function SignUp() {
               <TouchableOpacity 
   
 >
-  <MaterialCommunityIcons name="home" size={28} color="#fff" />
+  
 </TouchableOpacity>
 
 {/* About Us Button - Top Right */}
@@ -204,6 +205,7 @@ export default function SignUp() {
             </TouchableOpacity>
           </Link>
         </View>
+        </View> 
       </ScrollView>
       </KeyboardAvoidingView>
       </ImageBackground>
@@ -229,7 +231,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 24,
+  },
+  formContainer: {   // ADD THIS WHOLE BLOCK
+    width: '100%',
+    maxWidth: 450,   // Change this number to make it wider/narrower
+    alignItems: 'center',
   },
   iconContainer: {
     alignItems: 'center',
@@ -262,6 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     marginBottom: 16,
+    width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.2)', // Transparent white
   },
   inputIcon: {
@@ -284,6 +293,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 2,
+    width: '100%',
     borderColor: '#fff',
   },
   signUpButtonDisabled: {

@@ -4,6 +4,7 @@ import 'expo-router/entry';
 import React from 'react';
 import {
   ImageBackground,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -17,10 +18,16 @@ export default function HomeScreen() {
 
   return (
     <ImageBackground
-      source={require('../../assets/images/clinic.jpg')}
+      source={{ uri: 'https://t4.ftcdn.net/jpg/08/36/35/21/360_F_836352120_kxdMqhvhvjdPgfOnTHzL9VgZsinmYkky.jpg' }}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
+      <ScrollView
+  contentContainerStyle={styles.content}
+  keyboardShouldPersistTaps="handled">
+  
+  <View style={styles.formContainer}>   
+
       {/* Semi-transparent overlay */}
       <View style={styles.overlay} />
     <SafeAreaView style={styles.container}>
@@ -47,9 +54,7 @@ export default function HomeScreen() {
         {/* Welcome Text */}
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTitle}>Welcome!</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Manage your appointments and access your health records
-          </Text>
+          
         </View>
 
         {/* Buttons */}
@@ -71,9 +76,19 @@ export default function HomeScreen() {
         <Text style={styles.footer}>
           By continuing, you agree to our Terms & Privacy Policy
         </Text>
-      </View>
-    </SafeAreaView>
+        
+         </View>  
+         {/* ADD THIS LINE */}
+         </SafeAreaView>
+
+      
+      
+
+    
+    </View>
+    </ScrollView> 
     </ImageBackground>
+    
   );
 }
 
@@ -85,7 +100,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(166, 166, 167, 0)',
   },
   container: {
     flex: 1,
@@ -95,6 +110,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
+  },
+  formContainer: {   // ADD THIS WHOLE BLOCK
+    width: '100%',
+    maxWidth: 450,   // Change this number to make it wider/narrower
+    alignItems: 'center',
   },
   logoContainer: {
     marginBottom: 20,
@@ -150,6 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
+    width: '100%', 
     borderColor: '#fff',
   },
   loginButtonText: {
@@ -164,6 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
+    width: '100%', 
     borderColor: '#fff',
   },
   registerButtonText: {
