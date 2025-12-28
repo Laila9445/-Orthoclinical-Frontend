@@ -37,9 +37,14 @@ export default function Index() {
 
     if (result.success) {
       Alert.alert('Success', 'Login successful!');
-      if (result.role === 'doctor') {
+      if (result.user?.role?.toLowerCase() === 'doctor') {
         router.replace('./DoctorDashboardScreen');
+      } else if (result.user?.role?.toLowerCase() === 'nurse') {
+        router.replace('./DashboardScreen');
+      } else if (result.user?.role?.toLowerCase() === 'patient') {
+        router.replace('./patient/PatientDashboardScreen');
       } else {
+        // Default navigation if role is not specified
         router.replace('./DashboardScreen');
       }
     } else {
@@ -132,10 +137,7 @@ export default function Index() {
               </TouchableOpacity>
             </View>
 
-            {/* Forgot Password */}
-            <TouchableOpacity onPress={() => { }} disabled={loading}>
-              <Text style={styles.forgotPassword}>Forgot Password?</Text>
-            </TouchableOpacity>
+
 
             {/* Login Button */}
             <TouchableOpacity

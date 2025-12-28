@@ -49,7 +49,7 @@ const MyPatientsScreen = () => {
     },
     {
       id: 2,
-      name: 'Sarah Williams',
+      name: 'Soha Mohamed',
       age: 38,
       gender: 'Female',
       mrn: 'MRN-002',

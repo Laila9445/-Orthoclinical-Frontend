@@ -16,7 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 const NurseProfileScreen = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, changePassword } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -30,7 +30,7 @@ const NurseProfileScreen = () => {
 
   useEffect(() => {
     // Initialize form with user data
-    setEditedName(user?.name || 'Sarah Johnson');
+    setEditedName(user?.name || 'Sara Ahmed');
     setEditedEmail(user?.email || user?.email || 'sarah.johnson@clinic.com');
     setEditedPhone(user?.phone || '+1 (555) 123-4567');
     setProfileImage(user?.profileImage || null);
@@ -54,14 +54,9 @@ const NurseProfileScreen = () => {
   };
 
   // Handle change password
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill all password fields');
-      return;
-    }
-
-    if (currentPassword !== 'nurse123') {
-      Alert.alert('Error', 'Current password is incorrect');
       return;
     }
 
@@ -74,12 +69,23 @@ const NurseProfileScreen = () => {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
-
-    Alert.alert('Success', 'Password changed successfully!');
-    setShowPasswordModal(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    
+    try {
+      const result = await changePassword(currentPassword, newPassword);
+      
+      if (result.success) {
+        Alert.alert('Success', result.message || 'Password changed successfully!');
+        setShowPasswordModal(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      Alert.alert('Error', 'Failed to change password. Please try again.');
+    }
   };
 
   // Handle profile picture change
@@ -190,7 +196,7 @@ const NurseProfileScreen = () => {
             </TouchableOpacity>
           </View>
           <Text style={styles.profileName}>
-            {editedName || 'Sarah Johnson'}
+            {editedName || 'Sara Ahmed'}
           </Text>
           <Text style={styles.profileRole}>Registered Nurse</Text>
         </View>
@@ -209,7 +215,7 @@ const NurseProfileScreen = () => {
                   onPress={() => {
                     setIsEditing(false);
                     // Reset to original values
-                    setEditedName(user?.name || 'Sarah Johnson');
+                    setEditedName(user?.name || 'Sara Ahmed');
                     setEditedEmail(user?.email || user?.email || 'sarah.johnson@clinic.com');
                     setEditedPhone(user?.phone || '+1 (555) 123-4567');
                   }}

@@ -14,9 +14,10 @@ import {
     View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 const DoctorProfileScreen = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, changePassword } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -54,14 +55,9 @@ const DoctorProfileScreen = () => {
   };
 
   // Handle change password
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Error', 'Please fill all password fields');
-      return;
-    }
-
-    if (currentPassword !== 'doctor123') {
-      Alert.alert('Error', 'Current password is incorrect');
       return;
     }
 
@@ -74,12 +70,23 @@ const DoctorProfileScreen = () => {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
-
-    Alert.alert('Success', 'Password changed successfully!');
-    setShowPasswordModal(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    
+    try {
+      const result = await changePassword(currentPassword, newPassword);
+      
+      if (result.success) {
+        Alert.alert('Success', result.message || 'Password changed successfully!');
+        setShowPasswordModal(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        Alert.alert('Error', result.error || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      Alert.alert('Error', 'Failed to change password. Please try again.');
+    }
   };
 
   // Handle profile picture change

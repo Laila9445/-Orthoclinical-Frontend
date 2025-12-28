@@ -19,15 +19,29 @@ const ContactUs = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!name || !email || !message) {
-            Alert.alert('خطأ', 'من فضلك املأ جميع الحقول');
+            Alert.alert('Error', 'Please fill in all fields');
             return;
         }
-        Alert.alert('تم الإرسال', 'شكراً لتواصلك معنا!');
-        setName('');
-        setEmail('');
-        setMessage('');
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Error', 'Please enter a valid email address');
+            return;
+        }
+        
+        try {
+            // In a real app, this would send the contact form to the backend
+            // For now, we'll just show a success message
+            Alert.alert('Success', 'Your message has been sent successfully!');
+            setName('');
+            setEmail('');
+            setMessage('');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to send message. Please try again later.');
+        }
     };
 
     const ContactInfoItem = ({ icon, text }) => (
@@ -113,7 +127,7 @@ const ContactUs = () => {
 
                 {/* Contact Info Section */}
                 <View style={styles.contactInfoSection}>
-                    <ContactInfoItem icon="✉️" text="support@clinicms.com" />
+                    <ContactInfoItem icon="✉️" text="support@orthoclinical.com" />
                     <ContactInfoItem icon="📞" text="+20 100 123 4567" />
                     <ContactInfoItem icon="📍" text="Nile University, Giza, Egypt" />
                 </View>
