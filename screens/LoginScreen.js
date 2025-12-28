@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -41,9 +41,14 @@ const LoginScreen = () => {
     if (result.success) {
       Alert.alert('Success', 'Login successful!');
       // Navigate to appropriate dashboard based on role
-      if (result.role === 'doctor') {
+      if (result.user?.role?.toLowerCase() === 'doctor') {
         router.replace('/DoctorDashboardScreen');
+      } else if (result.user?.role?.toLowerCase() === 'nurse') {
+        router.replace('/DashboardScreen');
+      } else if (result.user?.role?.toLowerCase() === 'patient') {
+        router.replace('/patient/PatientDashboardScreen');
       } else {
+        // Default navigation if role is not specified
         router.replace('/DashboardScreen');
       }
     } else {
@@ -51,41 +56,7 @@ const LoginScreen = () => {
     }
   };
 
-  const handleBiometricLogin = async () => {
-    try {
-      // Check if device supports biometric authentication
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      if (!hasHardware) {
-        Alert.alert('Not Supported', 'Biometric authentication is not supported on this device');
-        return;
-      }
 
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      if (!isEnrolled) {
-        Alert.alert('Not Enrolled', 'No biometric data found. Please set up biometrics in your device settings.');
-        return;
-      }
-
-      // Attempt biometric authentication
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Login with Biometrics',
-        fallbackLabel: 'Use passcode',
-      });
-
-      if (result.success) {
-        // On successful biometric auth, login with any email
-        const loginResult = await login(email || 'nurse@clinic.com', 'nurse123');
-        if (loginResult.success) {
-          Alert.alert('Success', 'Login successful!');
-          router.replace('/DashboardScreen');
-        }
-      } else {
-        Alert.alert('Authentication Failed', 'Please try again');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'An error occurred during biometric authentication');
-    }
-  };
 
   return (
     <KeyboardAvoidingView
@@ -144,8 +115,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Forgot Password */}
-        <TouchableOpacity onPress={() => {}} disabled={loading}>
+        <TouchableOpacity onPress={() => router.push('/ForgotPassword')} disabled={loading}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
@@ -162,20 +132,12 @@ const LoginScreen = () => {
           )}
         </TouchableOpacity>
 
-        {/* Biometric Login Button */}
-        <TouchableOpacity
-          style={styles.biometricButton}
-          onPress={handleBiometricLogin}
-          disabled={loading}
-        >
-          <MaterialCommunityIcons name="fingerprint" size={24} color="#007BFF" />
-          <Text style={styles.biometricButtonText}>Login with Biometrics</Text>
-        </TouchableOpacity>
+
 
         {/* Sign Up Link */}
         <View style={styles.signUpContainer}>
           <Text style={styles.signUpText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => {}} disabled={loading}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/SignUp')} disabled={loading}>
             <Text style={styles.signUpLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
