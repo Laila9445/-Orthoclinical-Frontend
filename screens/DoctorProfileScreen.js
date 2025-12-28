@@ -31,9 +31,9 @@ const DoctorProfileScreen = () => {
 
   useEffect(() => {
     // Initialize form with user data
-    setEditedName(user?.name || 'Dr. Michael Green');
-    setEditedEmail(user?.email || user?.email || 'michael.green@clinic.com');
-    setEditedPhone(user?.phone || '+1 (555) 987-6543');
+    setEditedName(user?.name || 'Dr. Ahmed Nabil');
+    setEditedEmail(user?.email || user?.email || 'Ahmednabil@gmail.com');
+    setEditedPhone(user?.phone || '0109945487');
     setProfileImage(user?.profileImage || null);
   }, [user]);
 

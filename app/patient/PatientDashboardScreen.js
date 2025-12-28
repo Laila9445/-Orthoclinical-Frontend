@@ -11,7 +11,7 @@ const PatientDashboardScreen = () => {
   const mockAppointment = {
     date: 'February 1, 2025',
     time: '10:00 AM',
-    doctor: 'Dr. Ahmed Nabel',
+    doctor: 'Dr. Ahmed Nabil',
     clinic: 'Zayed Clinic'
   };
 
@@ -28,7 +28,7 @@ const PatientDashboardScreen = () => {
         <View style={styles.header}>
           <View>
             <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.patientName}>{user?.name || 'Patient'}</Text>
+            <Text style={styles.patientName}>{user?.name || 'Bassant'}</Text>
           </View>
           <TouchableOpacity
             style={styles.profileButton}

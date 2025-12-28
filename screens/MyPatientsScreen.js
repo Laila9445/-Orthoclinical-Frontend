@@ -22,7 +22,7 @@ const MyPatientsScreen = () => {
   const [patients] = useState([
     {
       id: 1,
-      name: 'John Doe',
+      name: 'Ahmed',
       age: 45,
       gender: 'Male',
       mrn: 'MRN-001',
@@ -76,7 +76,7 @@ const MyPatientsScreen = () => {
     },
     {
       id: 3,
-      name: 'Michael Chen',
+      name: 'Fatma Ali',
       age: 52,
       gender: 'Male',
       mrn: 'MRN-003',

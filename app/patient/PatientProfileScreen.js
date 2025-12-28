@@ -1,19 +1,19 @@
-﻿import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  Alert,
-  Switch,
-  Platform,
-} from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+﻿import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 
 const PatientProfileScreen = () => {
@@ -178,10 +178,10 @@ const PatientProfileScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.headerInfo}>
-              <Text style={styles.name}>{user?.name || 'Patient Name'}</Text>
+              <Text style={styles.name}>{user?.name || 'Bassant'}</Text>
               <Text style={styles.mrn}>{mrn}</Text>
               <Text style={styles.demographics}>
-                {ageText} • {user?.bloodType ?? 'Blood: —'} • {user?.gender ?? 'Gender: —'}
+                {ageText} • {user?.bloodType ?? 'Blood: A+'} • {user?.gender ?? 'Gender: Female'}
               </Text>
             </View>
           </View>

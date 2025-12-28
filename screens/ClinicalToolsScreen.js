@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -59,14 +59,14 @@ const ClinicalToolsScreen = () => {
 
   // Sample patients for selection
   const [availablePatients] = useState([
-    { id: 1, name: 'John Smith', age: 45, mrn: 'MRN-001' },
-    { id: 2, name: 'Emma Johnson', age: 38, mrn: 'MRN-002' },
-    { id: 3, name: 'Michael Brown', age: 52, mrn: 'MRN-003' },
-    { id: 4, name: 'Sara Ahmed', age: 34, mrn: 'MRN-004' },
-    { id: 5, name: 'Robert Wilson', age: 41, mrn: 'MRN-005' },
-    { id: 6, name: 'Emily Chen', age: 29, mrn: 'MRN-006' },
-    { id: 7, name: 'David Martinez', age: 56, mrn: 'MRN-007' },
-    { id: 8, name: 'Lisa Anderson', age: 42, mrn: 'MRN-008' },
+    { id: 1, name: 'Ahmed Gamal', age: 45, mrn: 'MRN-001' },
+    { id: 2, name: 'Jana Mohamed', age: 38, mrn: 'MRN-002' },
+    { id: 3, name: 'Omar Hesham', age: 52, mrn: 'MRN-003' },
+    { id: 4, name: 'Noura Adel', age: 34, mrn: 'MRN-004' },
+    { id: 5, name: 'Karim Tamer', age: 41, mrn: 'MRN-005' },
+    { id: 6, name: 'Lina Ashraf', age: 29, mrn: 'MRN-006' },
+    { id: 7, name: 'Tareq Waleed', age: 56, mrn: 'MRN-007' },
+    { id: 8, name: 'Mai Khaled', age: 42, mrn: 'MRN-008' },
   ]);
 
   // Sample prescription data
@@ -75,7 +75,7 @@ const ClinicalToolsScreen = () => {
       id: '1',
       rxCode: 'RX-2024-001',
       status: 'Active',
-      patient: 'John Smith',
+      patient: 'Ahmed Gamal',
       date: '1/15/2024',
       diagnosis: 'Upper respiratory infection',
       medications: 'Amoxicillin 500mg, Ibuprofen 400mg',
@@ -87,7 +87,7 @@ const ClinicalToolsScreen = () => {
       id: '2',
       rxCode: 'RX-2024-002',
       status: 'Dispensed',
-      patient: 'Emma Johnson',
+      patient: 'Jana Mohamed',
       date: '1/14/2024',
       diagnosis: 'Type 2 Diabetes management',
       medications: 'Metformin 500mg',
@@ -99,7 +99,7 @@ const ClinicalToolsScreen = () => {
       id: '3',
       rxCode: 'RX-2024-003',
       status: 'Active',
-      patient: 'Michael Brown',
+      patient: 'Omar Hesham',
       date: '1/13/2024',
       diagnosis: 'Hypertension',
       medications: 'Lisinopril 10mg, Amlodipine 5mg',
@@ -123,7 +123,7 @@ const ClinicalToolsScreen = () => {
       id: '5',
       rxCode: 'RX-2024-005',
       status: 'Active',
-      patient: 'Robert Wilson',
+      patient: 'Karim Tamer',
       date: '1/11/2024',
       diagnosis: 'Allergic rhinitis',
       medications: 'Cetirizine 10mg, Fluticasone nasal spray',
@@ -135,7 +135,7 @@ const ClinicalToolsScreen = () => {
       id: '6',
       rxCode: 'RX-2024-006',
       status: 'Active',
-      patient: 'Emily Chen',
+      patient: 'Lina Ashraf',
       date: '1/10/2024',
       diagnosis: 'Migraine',
       medications: 'Sumatriptan 50mg',
@@ -147,7 +147,7 @@ const ClinicalToolsScreen = () => {
       id: '7',
       rxCode: 'RX-2024-007',
       status: 'Dispensed',
-      patient: 'David Martinez',
+      patient: 'Mai Khaled',
       date: '1/9/2024',
       diagnosis: 'Asthma',
       medications: 'Albuterol inhaler',
@@ -159,7 +159,7 @@ const ClinicalToolsScreen = () => {
       id: '8',
       rxCode: 'RX-2024-008',
       status: 'Pending',
-      patient: 'Lisa Anderson',
+      patient: 'Noura Adel',
       date: '1/8/2024',
       diagnosis: 'Osteoarthritis',
       medications: 'Naproxen 500mg',
