@@ -23,7 +23,7 @@ const mockPrescriptions = [
     medication: 'Amoxicillin',
     dosage: '500mg',
     instructions: 'Take twice daily with food',
-    doctor: 'Dr. Ahmed Nabel',
+    doctor: 'Dr. Ahmed Nabil',
     startDate: '2024-01-20',
     durationDays: 7,
     daysRemaining: 3,

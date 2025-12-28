@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   Alert,
   Dimensions,
   Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -23,7 +23,7 @@ const mockAppointments = [
     patientId: 'P-2024-001',
     date: '2024-02-01',
     time: '10:00 AM',
-    doctorName: 'Dr. Ahmed Nabel',
+    doctorName: 'Dr. Ahmed Nabil',
     specialty: 'Orthopedic Surgeon',
     clinic: 'Zayed Clinic',
     status: 'confirmed', // upcoming
@@ -43,9 +43,9 @@ const mockAppointments = [
     patientId: 'P-2024-001',
     date: '2024-01-15',
     time: '11:00 AM',
-    doctorName: 'Dr. Samir Ali',
-    specialty: 'Cardiology',
-    clinic: 'Heart Center',
+    doctorName: 'Dr. Ahmed Nabil',
+    specialty: 'Orthopedic',
+    clinic: 'fatigue',
     status: 'cancelled',
   },
 ];

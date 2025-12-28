@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   SafeAreaView,
@@ -19,16 +19,16 @@ const DashboardScreen = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [tasks, setTasks] = useState([
     { id: 1, title: 'Prepare Room 3', completed: false },
-    { id: 2, title: 'Administer Medication for J. Doe', completed: true },
-    { id: 3, title: 'Follow-up Call with A. Smith', completed: false },
+    { id: 2, title: 'check the room ', completed: true },
+    { id: 3, title: 'Follow-up Call with Mohamed Ibrahim', completed: false },
   ]);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [patientQueue, setPatientQueue] = useState([
-    { id: 1, name: 'Liam Johnson', doctor: 'Dr. Green', waitTime: '15 min' },
-    { id: 2, name: 'Olivia Williams', doctor: 'Dr. Carter', waitTime: '25 min' },
+    { id: 1, name: 'Soha fathi', doctor: 'Dr. Ahmed Nabil', waitTime: '15 min' },
+    { id: 2, name: 'Aya Ali', doctor: 'Dr. Ahmed Nabil', waitTime: '25 min' },
   ]);
   
   // Calculate patients waiting count dynamically
@@ -127,7 +127,7 @@ const DashboardScreen = () => {
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.greeting}>
-            {getGreeting()}, {user?.name || 'Nurse'}
+            {getGreeting()}, {user?.name || 'Sara'}
           </Text>
           <Text style={styles.date}>{getCurrentDate()}</Text>
         </View>

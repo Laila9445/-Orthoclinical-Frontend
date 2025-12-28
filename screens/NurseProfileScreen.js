@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
@@ -31,8 +31,8 @@ const NurseProfileScreen = () => {
   useEffect(() => {
     // Initialize form with user data
     setEditedName(user?.name || 'Sara Ahmed');
-    setEditedEmail(user?.email || user?.email || 'sarah.johnson@clinic.com');
-    setEditedPhone(user?.phone || '+1 (555) 123-4567');
+    setEditedEmail(user?.email || user?.email || 'sarahAhmed@gmail.com');
+    setEditedPhone(user?.phone || '01052784584');
     setProfileImage(user?.profileImage || null);
   }, [user]);
 

@@ -18,7 +18,7 @@ const mockVisits = [
     id: 1,
     patientId: 'P-2024-001',
     date: '2025-12-05',
-    doctor: 'Dr. Ahmed Nabel',
+    doctor: 'Dr. Ahmed Nabil',
     specialty: 'Orthopedics',
     reason: 'Knee pain after fall',
     diagnosis: 'Medial meniscus tear',
@@ -47,9 +47,9 @@ const mockVisits = [
     patientId: 'P-2024-001',
     date: '2024-11-10',
     doctor: 'Dr. Samir Ali',
-    specialty: 'Cardiology',
-    reason: 'Chest discomfort on exertion',
-    diagnosis: 'Stable angina',
+    specialty: 'Orthopedic',
+    reason: 'follow up',
+    diagnosis: 'Stable',
     notes:
       'Chest discomfort with exertion, ECG shows no acute changes. Started on low-dose aspirin and statin. Referred for stress test.',
     medications: [
@@ -64,9 +64,9 @@ const mockVisits = [
     patientId: 'P-2023-04-01',
     date: '2023-04-01',
     doctor: 'Dr. Rana Qassim',
-    specialty: 'Dermatology',
-    reason: 'Rash',
-    diagnosis: 'Eczema',
+    specialty: 'Orthopedic',
+    reason: '...',
+    diagnosis: 'bones',
     notes: 'Topical steroid prescribed. Avoid triggers.',
     medications: [{ name: 'Hydrocortisone cream', frequency: 'apply BID' }],
     labs: [],
@@ -243,7 +243,7 @@ const MyMedicalRecordsScreen = () => {
                     </View>
 
                     <Text style={styles.docText}>
-                      {v.doctor} • <Text style={styles.specialty}>{v.specialty}</Text>
+                      {v.doctor} ï¿½ <Text style={styles.specialty}>{v.specialty}</Text>
                     </Text>
 
                     <Text style={styles.reasonText}>{v.reason}</Text>
@@ -261,7 +261,7 @@ const MyMedicalRecordsScreen = () => {
                         <Text style={styles.sectionTitle}>Medications</Text>
                         {v.medications && v.medications.length > 0 ? (
                           v.medications.map((m, i) => (
-                            <Text key={i} style={styles.sectionText}>• {m.name} — {m.frequency}</Text>
+                            <Text key={i} style={styles.sectionText}>ï¿½ {m.name} ï¿½ {m.frequency}</Text>
                           ))
                         ) : (
                           <Text style={styles.sectionText}>None</Text>
@@ -270,7 +270,7 @@ const MyMedicalRecordsScreen = () => {
                         <Text style={styles.sectionTitle}>Lab tests</Text>
                         {v.labs && v.labs.length > 0 ? (
                           v.labs.map((l, i) => (
-                            <Text key={i} style={styles.sectionText}>• {l.test} — {l.status}</Text>
+                            <Text key={i} style={styles.sectionText}>ï¿½ {l.test} ï¿½ {l.status}</Text>
                           ))
                         ) : (
                           <Text style={styles.sectionText}>None</Text>

@@ -1,17 +1,16 @@
-import React, { useState, createContext, useContext } from 'react';
-import { useAuth } from '../context/AuthContext';
-import api from '../utils/api';
+import { createContext, useContext, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
+  Linking,
+  Modal,
   ScrollView,
   StyleSheet,
-  Modal,
-  Alert,
-  Linking,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 // constants
 const DOCTOR = {

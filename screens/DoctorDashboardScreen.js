@@ -1,19 +1,19 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    Image,
-    Modal,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { usePatient } from '../context/PatientContext';
@@ -85,11 +85,11 @@ const DoctorDashboardScreen = () => {
 
   // Today's appointments data (replacing patient queue)
   const [todayAppointments] = useState([
-    { id: 1, time: '09:00 AM', patientName: 'Maria Rodriguez', patientId: '1001', status: 'completed' },
-    { id: 2, time: '10:30 AM', patientName: 'John Smith', patientId: '1002', status: 'cancelled' },
-    { id: 3, time: '11:15 AM', patientName: 'Emily Chen', patientId: '1003', status: 'completed' },
-    { id: 4, time: '01:00 PM', patientName: 'Robert Johnson', patientId: '1004', status: 'upcoming' },
-    { id: 5, time: '02:00 PM', patientName: 'Maria Rodriguez', patientId: '1005', status: 'upcoming' },
+    { id: 1, time: '09:00 AM', patientName: 'Mohamed Ibrahim', patientId: '1001', status: 'completed' },
+    { id: 2, time: '10:30 AM', patientName: 'Hassan Ali', patientId: '1002', status: 'cancelled' },
+    { id: 3, time: '11:15 AM', patientName: 'Fatma Ahmed', patientId: '1003', status: 'completed' },
+    { id: 4, time: '01:00 PM', patientName: 'Youssef Mohamed', patientId: '1004', status: 'upcoming' },
+    { id: 5, time: '02:00 PM', patientName: 'Mona Ahmed', patientId: '1005', status: 'upcoming' },
     { id: 6, time: '03:30 PM', patientName: 'Nada Hassan', patientId: '1006', status: 'completed' },
   ]);
 
@@ -103,7 +103,7 @@ const DoctorDashboardScreen = () => {
   const [labResultsData] = useState([
     { 
       id: 1,
-      patientName: 'Maria Rodriguez', 
+      patientName: 'Fatma Ahmed', 
       patientId: 'P-2024-001',
       testType: 'Complete Blood Count (CBC)', 
       testId: 'LAB-001',
@@ -113,7 +113,7 @@ const DoctorDashboardScreen = () => {
     },
     { 
       id: 2,
-      patientName: 'John Smith', 
+      patientName: 'Mohamed Ibrahim', 
       patientId: 'P-2024-002',
       testType: 'Lipid Panel', 
       testId: 'LAB-002',
@@ -123,7 +123,7 @@ const DoctorDashboardScreen = () => {
     },
     { 
       id: 3,
-      patientName: 'Emily Chen', 
+      patientName: 'Mona Ahmed', 
       patientId: 'P-2024-003',
       testType: 'Thyroid Function Tests', 
       testId: 'LAB-003',
@@ -133,7 +133,7 @@ const DoctorDashboardScreen = () => {
     },
     { 
       id: 4,
-      patientName: 'Robert Johnson', 
+      patientName: 'Youssef Mohamed', 
       patientId: 'P-2024-004',
       testType: 'Liver Function Tests', 
       testId: 'LAB-004',
@@ -145,11 +145,11 @@ const DoctorDashboardScreen = () => {
 
   // Today's Tasks data
   const [todayTasks, setTodayTasks] = useState([
-    { id: 1, task: "Call Maria Rodriguez about test results", time: "10:30 AM", completed: false, highlighted: true },
-    { id: 2, task: "Review John Smith's MRI scan", time: "10:30 AM", completed: false, highlighted: false },
+    { id: 1, task: "Call Youssef Mohamed about test results", time: "10:30 AM", completed: false, highlighted: true },
+    { id: 2, task: "Review Fatma Ahmed's MRI scan", time: "10:30 AM", completed: false, highlighted: false },
     { id: 3, task: "Follow up with family Clean prescription", time: "2:00 PM", completed: false, highlighted: false },
     { id: 4, task: "Complete weekly reports", time: "Due 8 days", completed: false, highlighted: false },
-    { id: 5, task: "Check lab results for Robert Johnson", time: "2:00 PM", completed: true, highlighted: false },
+    { id: 5, task: "Check lab results for Nada Ahmed", time: "2:00 PM", completed: true, highlighted: false },
   ]);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -300,7 +300,13 @@ const DoctorDashboardScreen = () => {
     if (result && result.success) {
       Alert.alert(
         'Success',
-        `Prescription saved successfully!\n\nPatient: ${prescription.patientName}\nMedication: ${selectedMed}\nDosage: ${dosage}\nFrequency: ${frequency}\nDuration: ${duration}`,
+        `Prescription saved successfully!
+
+Patient: ${prescription.patientName}
+Medication: ${selectedMed}
+Dosage: ${dosage}
+Frequency: ${frequency}
+Duration: ${duration}`,
         [{ text: 'OK' }]
       );
       setShowPrescriptionModal(false);
@@ -428,7 +434,11 @@ const DoctorDashboardScreen = () => {
     
     Alert.alert(
       'End Consultation',
-      `Are you sure you want to end consultation with ${patientName}?\n\nDuration: ${formatTime(finalTimer)}\n\nConsultation notes will be saved automatically.`,
+      `Are you sure you want to end consultation with ${patientName}?
+
+Duration: ${formatTime(finalTimer)}
+
+Consultation notes will be saved automatically.`,
       [
         { 
           text: 'Cancel', 
@@ -1290,6 +1300,19 @@ const DoctorDashboardScreen = () => {
                           <TouchableOpacity
                             key={result.id}
                             style={styles.tableRow}
+                            onPress={() => {
+                              // Navigate to view lab results details
+                              router.push({
+                                pathname: '/ClinicalToolsScreen',
+                                params: { 
+                                  screen: 'lab-results',
+                                  patientId: result.patientId,
+                                  patientName: result.patientName,
+                                  testType: result.testType,
+                                  resultId: result.id
+                                }
+                              });
+                            }}
                           >
                             <View style={styles.tableCell}>
                               <Text style={styles.tableCellText}>{result.patientName}</Text>
@@ -1346,6 +1369,19 @@ const DoctorDashboardScreen = () => {
                             <TouchableOpacity
                               key={result.id}
                               style={[styles.tableRow, styles.tableRowMobile]}
+                              onPress={() => {
+                                // Navigate to view lab results details
+                                router.push({
+                                  pathname: '/ClinicalToolsScreen',
+                                  params: { 
+                                    screen: 'lab-results',
+                                    patientId: result.patientId,
+                                    patientName: result.patientName,
+                                    testType: result.testType,
+                                    resultId: result.id
+                                  }
+                                });
+                              }}
                             >
                               <View style={[styles.tableCell, styles.tableCellMobile]}>
                                 <Text style={[styles.tableCellText, styles.tableCellTextMobile]} numberOfLines={1}>{result.patientName}</Text>
@@ -1498,7 +1534,7 @@ const DoctorDashboardScreen = () => {
                   }}
                 >
                   <MaterialCommunityIcons name="clipboard-list" size={32} color="#10b981" />
-                  <Text style={styles.quickActionText}>Test Orders</Text>
+                  <Text style={styles.quickActionText}>Ontology</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.quickActionButton, !IS_TABLET && styles.quickActionButtonMobile]}
